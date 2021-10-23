@@ -1,4 +1,5 @@
 function [recordingFolder,subID] = MI1_offline_training()
+%% Change for testing 
 %% MOTOR IMAGERY Training Scaffolding 
 % This code creates a training paradigm with (#) classes on screen for
 % (#) numTrials. Before each trial, one of the targets is cued (and remains
