@@ -12,8 +12,8 @@ function [recordingFolder,subID] = MI1_offline_training()
 
 %% Make sure you have Lab Streaming Layer installed.
 % Set parameters (these will need to change according to your system):
-addpath('C:\Toolboxes\labstreaminglayer-master\LSL\liblsl-Matlab');     % lab streaming layer library
-addpath('C:\Toolboxes\labstreaminglayer-master\LSL\liblsl-Matlab\bin'); % lab streaming layer bin
+addpath('C:\Users\mazar\Documents\MATLAB\Michael Mazar\dependencies\liblsl-Matlab');     % lab streaming layer library
+addpath('C:\Users\mazar\Documents\MATLAB\Michael Mazar\dependencies\liblsl-Matlab\bin'); % lab streaming layer bin
 
 % Subject and recording parameters:
 subID = input('Please enter subject ID/Name: ');    % prompt to enter subject ID or name
@@ -31,7 +31,7 @@ readyLength = 1;                        % time "ready" on screen
 nextLength = 1;                         % time "next" on screen
 
 % Define length and classes
-numTrials = 10;                         % set number of training trials per class (the more classes, the more trials per class)
+numTrials = 10;                         % 5 number of trials - set number of training trials per class (the more classes, the more trials per class)
 numClasses = 3;                         % set number of possible classes
 
 % Set markers / triggers names
@@ -94,7 +94,7 @@ pause(InitWait)
 cla
 for trial = 1:totalTrials
     outletStream.push_sample(startTrial);       % trial trigger & counter
-    startTrial = startTrial + trial;    
+%     startTrial = startTrial + trial;    
     currentClass = trainingVec(trial);          % What class is it?
     
     % Cue before ready

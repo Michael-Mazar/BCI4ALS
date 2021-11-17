@@ -1,4 +1,4 @@
-function [] = MI2_preprocess(recordingFolder)
+function [EEG, originalEEG, EEG_afterHigh, EEG_afterLow, EEG_afterBandPass, EEG_afterLap] = MI2_preprocess(recordingFolder)
 %% Offline Preprocessing
 % Assumes recorded using Lab Recorder.
 % Make sure you have EEGLAB installed with ERPLAB & loadXDF plugins.
@@ -17,7 +17,7 @@ function [] = MI2_preprocess(recordingFolder)
 % so on - but please cite properly if published.
 
 %% Some parameters (this needs to change according to your system):
-addpath 'C:\Toolboxes\eeglab2020_0'           % update to your own computer path
+addpath 'C:\Users\mazar\Documents\MATLAB\Michael Mazar\dependencies\eeglab2021.0'           % update to your own computer path
 eeglab;                                     % open EEGLAB 
 highLim = 40;                               % filter data under 40 Hz
 lowLim = 0.5;                               % filter data above 0.5 Hz
@@ -31,40 +31,52 @@ EEG.setname = 'MI_sub';
 % their own openBCI setup.
 EEG_chans(1,:) = 'C03';
 EEG_chans(2,:) = 'C04';
-EEG_chans(3,:) = 'P07';
-EEG_chans(4,:) = 'P08';
-EEG_chans(5,:) = 'O01';
-EEG_chans(6,:) = 'O02';
-EEG_chans(7,:) = 'F07';
-EEG_chans(8,:) = 'F08';
-EEG_chans(9,:) = 'F03';
-EEG_chans(10,:) = 'F04';
-EEG_chans(11,:) = 'T07';
-EEG_chans(12,:) = 'T08';
-EEG_chans(13,:) = 'P03';
+EEG_chans(3,:) = 'C0Z';
+EEG_chans(4,:) = 'FC1';
+EEG_chans(5,:) = 'FC2';
+EEG_chans(6,:) = 'FC5';
+EEG_chans(7,:) = 'F06';
+EEG_chans(8,:) = 'CP1';
+EEG_chans(9,:) = 'CP2';
+EEG_chans(10,:) = 'CP5';
+EEG_chans(11,:) = 'CP6';
+EEG_chans(12,:) = 'O01';
+EEG_chans(13,:) = 'O02';
+% Irrelevant electrodes add more if there are
 EEG_chans(14,:) = 'P03';
 EEG_chans(15,:) = 'P03';
 EEG_chans(16,:) = 'P03';
 
 %% (3) Low-pass filter
+originalEEG = EEG.data;
 EEG = pop_eegfiltnew(EEG, 'hicutoff',highLim,'plotfreqz',1);    % remove data above
 EEG = eeg_checkset( EEG );
+EEG_afterHigh = EEG.data; % Return highpass
+
 % (3) High-pass filter
 EEG = pop_eegfiltnew(EEG, 'locutoff',lowLim,'plotfreqz',1);     % remove data under
 EEG = eeg_checkset( EEG );
+EEG_afterLow = EEG.data;
+
 % (4) Notch filter - this uses the ERPLAB filter
-EEG  = pop_basicfilter( EEG,  1:15 , 'Boundary', 'boundary', 'Cutoff',  50, 'Design', 'notch', 'Filter', 'PMnotch', 'Order',  180 );
+EEG  = pop_basicfilter(EEG,  1:16 , 'Boundary', 'boundary', 'Cutoff',  50, 'Design', 'notch', 'Filter', 'PMnotch', 'Order',  180 );
 EEG = eeg_checkset( EEG );
+EEG_afterBandPass = EEG.data;
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%% (5) Add advanced artifact removal functions %%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% (5) Laplacian filter
+[EEG_afterLap] = laplacian_1d_filter(EEG);
+EEG.data = EEG_afterLap;
+EEG = eeg_checkset( EEG );
 
+% (6) ICA Processing 
 % Save the data into .mat variables on the computer
 EEG_data = EEG.data;            % Pre-processed EEG data
 EEG_event = EEG.event;          % Saved markers for sorting the data
 save(strcat(recordingFolder,'\','cleaned_sub.mat'),'EEG_data');
 save(strcat(recordingFolder,'\','EEG_events.mat'),'EEG_event');
-save(strcat(recordingFolder,'\','EEG_chans.mat'),'EEG_chans');
-                
+save(strcat(recordingFolder,'\','EEG_chans.mat'),'EEG_chans');          
 end
