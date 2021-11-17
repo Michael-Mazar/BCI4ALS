@@ -11,7 +11,6 @@
 % (harelasa@post.bgu.ac.il) in 2021. You are free to use, change, adapt and
 % so on - but please cite properly if published.
 
-
 clc; clear; close all;
 
 %% Run stimulation and record EEG data
