@@ -13,12 +13,17 @@ function [] = MI4_featureExtraction(recordingFolder)
 % so on - but please cite properly if published.
 
 %% Load previous variables:
+
+
+%OSHER: remove later - this overrides the function's input
+recordingFolder ='D:\BCI4ALS\data\';
+
 load(strcat(recordingFolder,'EEG_chans.mat'));                  % load the openBCI channel location
 load(strcat(recordingFolder,'MIData.mat'));                     % load the EEG data
 targetLabels = cell2mat(struct2cell(load(strcat(recordingFolder,'\trainingVec'))));
 
 Features2Select = 10;                                           % number of featuers for feature selection
-num4test = 5;                                                   % define how many test trials after feature extraction
+num4test = 2;                                                   % define how many test trials after feature extraction
 numClasses = length(unique(targetLabels));                      % set number of possible targets (classes)
 Fs = 125;                                                       % openBCI Cyton+Daisy by Bluetooth sample rate
 trials = size(MIData,1);                                        % get number of trials from main data variable
@@ -32,12 +37,12 @@ motorDataChan = {};
 welch = {};
 idxTarget = {};
 freq.low = 0.5;                             % INSERT the lowest freq 
-freq.high = 60;                             % INSERT the highst freq 
+freq.high = 40;                             % INSERT the highst freq 
 freq.Jump = 1;                              % SET the freq resolution
 f = freq.low:freq.Jump:freq.high;           % frequency vector
 window = 40;                                % INSERT sample size window for pwelch
 noverlap = 20;                              % INSERT number of sample overlaps for pwelch
-vizChans = [1,2];                           % INSERT which 2 channels you want to compare
+vizChans = [4,5];                           % INSERT which 2 channels you want to compare
 
 % create power spectrum figure:
 f1 = figure('name','PSD','NumberTitle','off');
@@ -86,7 +91,7 @@ for trial=1:size(leftClass,1)
     overallLeft = [overallLeft squeeze(leftClass(trial,:,:))];
     overallRight = [overallRight squeeze(rightClass(trial,:,:))];
 end
-vizTrial = 11;       % cherry-picked!
+vizTrial = 5;       % cherry-picked! % OSHER - what is this?
 figure;
 subplot(1,2,1)      % show a single trial before CSP seperation
 scatter3(squeeze(leftClass(vizTrial,1,:)),squeeze(leftClass(vizTrial,2,:)),squeeze(leftClass(vizTrial,3,:)),'b'); hold on
@@ -144,7 +149,8 @@ for trial = 1:trials                                % run over all the trials
         n = 1;                                      % start a new feature index
         for feature = 1:numSpectralFeatures                 % run over all spectral band power features from the section above
             % Extract features: bandpower +-1 Hz around each target frequency
-            MIFeaturesLabel(trial,channel,n) = bandpower(squeeze(MIData(trial,channel,times{feature})),Fs,bands{feature});
+            floored_time_indices = floor(times{feature});
+            MIFeaturesLabel(trial,channel,n) = bandpower(squeeze(MIData(trial,channel,floored_time_indices)),Fs,bands{feature});
             n = n+1;            
         end
         disp(strcat('Extracted Powerbands from electrode:',EEG_chans(channel,:)))
@@ -280,6 +286,20 @@ save(strcat(recordingFolder,'\LabelTest.mat'),'LabelTest');
 save(strcat(recordingFolder,'\LabelTrain.mat'),'LabelTrain');
 
 disp('Successfuly extracted features!');
+
+%% Osher: remarks:
+% for each i=1:num2test, point of *each label* is randomally selected. 
+% therefore, the number of test set is num2test*labelsNum
+
+% (similarily, training set's size is (datasetsize-num2test)*labelsNum
+
+% 227 features (with the default values in this script), 10
+% of them are selected
+
+% Each feature is a "combination" of the feature "type", channel and
+% frequency (excluding the CSP features which, to the best of my
+% understanding, are in the last 3 columns of the features matrix
+% (concatenated to the frequency-based features)
 
 end
 
