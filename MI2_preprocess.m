@@ -72,6 +72,7 @@ EEG_afterBandPass = EEG.data;
 EEG.data = EEG_afterLap;
 EEG = eeg_checkset( EEG );
 
+%try
 % (6) ICA Processing 
 % Save the data into .mat variables on the computer
 EEG_data = EEG.data;            % Pre-processed EEG data
