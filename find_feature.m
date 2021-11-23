@@ -1,5 +1,6 @@
 function [res] = find_feature(channels_amount, features_per_channel, feature_index)
 
+% the first features outside the loop
 if feature_index <= 3
     res = 'CSP ' + string(feature_index);
     return
