@@ -47,6 +47,7 @@ EEG_chans(14,:) = 'P03';
 EEG_chans(15,:) = 'P03';
 EEG_chans(16,:) = 'P03';
 
+
 %% (3) Low-pass filter
 originalEEG = EEG.data;
 EEG = pop_eegfiltnew(EEG, 'hicutoff',highLim,'plotfreqz',1);    % remove data above
@@ -63,42 +64,45 @@ EEG  = pop_basicfilter(EEG,  1:16 , 'Boundary', 'boundary', 'Cutoff',  50, 'Desi
 EEG = eeg_checkset( EEG );
 EEG_afterBandPass = EEG.data;
 
-figure;
-
-for channel_i = 1:2
-    title("Before Laplacian")
-    subplot(2,1,channel_i)
-    plot(EEG.data(channel_i,1000:2000))
-    xlim([0,1000])
-    ylabel(num2str(channel_i))
-    ylim([-100,100])
-
-end
-
-
+%% Advanced
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%% (5) Add advanced artifact removal functions %%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % (5) Laplacian filter
 
+%%% Plots raw data
+% figure;
+% for channel_i = 1:10
+%     title("Before Laplacian")
+%     subplot(10,1,channel_i)
+%     plot(1000:2000,EEG_afterLow(channel_i,1000:2000))
+%     xlim([1000,2000])
+%     ylabel(num2str(channel_i))
+%     ylim([-200,200])
+% 
+% end
+
+
+
 C03_ind = 1;
 C03_neighbors_ind = [4,6,8,10];
 C04_ind = 2;
 C04_neighbors_ind = [5,7,9,11];
-EEG_afterLap = laplacian_1d_filter(EEG.data, C03_ind, C03_neighbors_ind);
-EEG.data = EEG_afterLap;
-EEG_afterLap = laplacian_1d_filter(EEG.data, C04_ind, C04_neighbors_ind);
-EEG.data = EEG_afterLap;
-EEG = eeg_checkset( EEG );
-figure;
-for channel_i = 1:2
-    subplot(2,1,channel_i)
-    plot(EEG.data(channel_i,1000:2000))
-    xlim([0,1000])
-    ylabel(num2str(channel_i))
-    ylim([-100,100])
-    title("After Laplacian")
-end
+EEG_afterLapC_3 = spatial_laplace(EEG.data, C03_ind, C03_neighbors_ind);
+EEG.data = EEG_afterLapC_3;
+EEG_afterLap_C4 = spatial_laplace(EEG.data, C04_ind, C04_neighbors_ind);
+EEG.data = EEG_afterLap_C4;
+
+%%%Plots data after laplacian
+% figure;
+% for channel_i = 1:10
+%     subplot(10,1,channel_i)
+%     plot(1000:2000,EEG.data(channel_i,1000:2000))
+%     xlim([1000,2000])
+%     ylabel(num2str(channel_i))
+%     ylim([-200,200])
+%     title("After Laplacian")
+% end
 
 
 
