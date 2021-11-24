@@ -17,7 +17,7 @@ function [EEG, originalEEG, EEG_afterHigh, EEG_afterLow, EEG_afterBandPass, EEG_
 % so on - but please cite properly if published.
 
 %% Some parameters (this needs to change according to your system):
-addpath 'C:\Users\mazar\Documents\MATLAB\Michael Mazar\dependencies\eeglab2021.0'           % update to your own computer path
+addpath 'C:\Users\user\Documents\BCI4ALS\LabRecorder\M1 trails\10_11_21\No_Touch\2nd_try\fromdrive'           % update to your own computer path
 eeglab;                                     % open EEGLAB 
 highLim = 40;                               % filter data under 40 Hz
 lowLim = 0.5;                               % filter data above 0.5 Hz
@@ -31,15 +31,15 @@ EEG.setname = 'MI_sub';
 % their own openBCI setup.
 EEG_chans(1,:) = 'C03';
 EEG_chans(2,:) = 'C04';
-EEG_chans(3,:) = 'C0Z';
-EEG_chans(4,:) = 'FC1';
-EEG_chans(5,:) = 'FC2';
-EEG_chans(6,:) = 'FC5';
-EEG_chans(7,:) = 'F06';
-EEG_chans(8,:) = 'CP1';
-EEG_chans(9,:) = 'CP2';
-EEG_chans(10,:) = 'CP5';
-EEG_chans(11,:) = 'CP6';
+EEG_chans(3,:) = 'C0Z';  
+EEG_chans(4,:) = 'FC1';  %%HERE C03
+EEG_chans(5,:) = 'FC2';  %%HERE C04
+EEG_chans(6,:) = 'FC5';  %%HERE C03
+EEG_chans(7,:) = 'F06';  %%HERE C04
+EEG_chans(8,:) = 'CP1';  %%HERE C03
+EEG_chans(9,:) = 'CP2';  %%HERE C04
+EEG_chans(10,:) = 'CP5'; %%HERE C03
+EEG_chans(11,:) = 'CP6'; %%HERE C04
 EEG_chans(12,:) = 'O01';
 EEG_chans(13,:) = 'O02';
 % Irrelevant electrodes add more if there are
@@ -63,16 +63,45 @@ EEG  = pop_basicfilter(EEG,  1:16 , 'Boundary', 'boundary', 'Cutoff',  50, 'Desi
 EEG = eeg_checkset( EEG );
 EEG_afterBandPass = EEG.data;
 
+figure;
+
+for channel_i = 1:2
+    title("Before Laplacian")
+    subplot(2,1,channel_i)
+    plot(EEG.data(channel_i,1000:2000))
+    xlim([0,1000])
+    ylabel(num2str(channel_i))
+    ylim([-100,100])
+
+end
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%% (5) Add advanced artifact removal functions %%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % (5) Laplacian filter
-[EEG_afterLap] = laplacian_1d_filter(EEG);
+
+C03_ind = 1;
+C03_neighbors_ind = [4,6,8,10];
+C04_ind = 2;
+C04_neighbors_ind = [5,7,9,11];
+EEG_afterLap = laplacian_1d_filter(EEG.data, C03_ind, C03_neighbors_ind);
+EEG.data = EEG_afterLap;
+EEG_afterLap = laplacian_1d_filter(EEG.data, C04_ind, C04_neighbors_ind);
 EEG.data = EEG_afterLap;
 EEG = eeg_checkset( EEG );
+figure;
+for channel_i = 1:2
+    subplot(2,1,channel_i)
+    plot(EEG.data(channel_i,1000:2000))
+    xlim([0,1000])
+    ylabel(num2str(channel_i))
+    ylim([-100,100])
+    title("After Laplacian")
+end
 
-%try
+
+
 % (6) ICA Processing 
 % Save the data into .mat variables on the computer
 EEG_data = EEG.data;            % Pre-processed EEG data
