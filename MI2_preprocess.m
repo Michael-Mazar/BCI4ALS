@@ -88,9 +88,9 @@ C03_ind = 1;
 C03_neighbors_ind = [4,6,8,10];
 C04_ind = 2;
 C04_neighbors_ind = [5,7,9,11];
-EEG_afterLapC_3 = spatial_laplace(EEG.data, C03_ind, C03_neighbors_ind);
+EEG_afterLapC_3 = laplacian_1d_filter(EEG.data, C03_ind, C03_neighbors_ind);
 EEG.data = EEG_afterLapC_3;
-EEG_afterLap_C4 = spatial_laplace(EEG.data, C04_ind, C04_neighbors_ind);
+EEG_afterLap_C4 = laplacian_1d_filter(EEG.data, C04_ind, C04_neighbors_ind);
 EEG.data = EEG_afterLap_C4;
 
 %%%Plots data after laplacian
