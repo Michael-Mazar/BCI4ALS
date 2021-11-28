@@ -1,4 +1,4 @@
-function [EEG, originalEEG, EEG_afterHigh, EEG_afterLow, EEG_afterBandPass, EEG_afterLap] = MI2_preprocess(recordingFolder)
+function [EEG, originalEEG, EEG_afterHigh, EEG_afterLow, EEG_afterBandPass] = MI2_preprocess(recordingFolder)
 %% Offline Preprocessing
 % Assumes recorded using Lab Recorder.
 % Make sure you have EEGLAB installed with ERPLAB & loadXDF plugins.
@@ -42,10 +42,15 @@ EEG_chans(10,:) = 'CP5';
 EEG_chans(11,:) = 'CP6';
 EEG_chans(12,:) = 'O01';
 EEG_chans(13,:) = 'O02';
+
+% Remove the bad channels
+EEG.nbchan = 13;
+EEG.data = EEG.data(1:13,:);
+
 % Irrelevant electrodes add more if there are
-EEG_chans(14,:) = 'P03';
-EEG_chans(15,:) = 'P03';
-EEG_chans(16,:) = 'P03';
+% EEG_chans(14,:) = 'P03';
+% EEG_chans(15,:) = 'P03';
+% EEG_chans(16,:) = 'P03';
 
 %% (3) Low-pass filter
 originalEEG = EEG.data;
@@ -59,7 +64,7 @@ EEG = eeg_checkset( EEG );
 EEG_afterLow = EEG.data;
 
 % (4) Notch filter - this uses the ERPLAB filter
-EEG  = pop_basicfilter(EEG,  1:16 , 'Boundary', 'boundary', 'Cutoff',  50, 'Design', 'notch', 'Filter', 'PMnotch', 'Order',  180 );
+EEG  = pop_basicfilter(EEG,  1:13 , 'Boundary', 'boundary', 'Cutoff',  50, 'Design', 'notch', 'Filter', 'PMnotch', 'Order',  180 );
 EEG = eeg_checkset( EEG );
 EEG_afterBandPass = EEG.data;
 
@@ -68,14 +73,19 @@ EEG_afterBandPass = EEG.data;
 %%%%%%% (5) Add advanced artifact removal functions %%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % (5) Laplacian filter
-[EEG_afterLap] = laplacian_1d_filter(EEG);
-EEG.data = EEG_afterLap;
-EEG = eeg_checkset( EEG );
+C03_ind = 1;
+C03_neighbors_ind = [4,6,8,10];
+C04_ind = 2;
+C04_neighbors_ind = [5,7,9,11];
+EEG_afterLapC_3 = laplacian_1d_filter(EEG.data, C03_ind, C03_neighbors_ind);
+EEG.data = EEG_afterLapC_3;
+EEG_afterLap_C4 = laplacian_1d_filter(EEG.data, C04_ind, C04_neighbors_ind);
+EEG.data = EEG_afterLap_C4;
 
 %try
 % (6) ICA Processing 
 % Save the data into .mat variables on the computer
-EEG_data = EEG.data;            % Pre-processed EEG data
+EEG_data = EEG_afterLap_C4;            % Pre-processed EEG data
 EEG_event = EEG.event;          % Saved markers for sorting the data
 save(strcat(recordingFolder,'\','cleaned_sub.mat'),'EEG_data');
 save(strcat(recordingFolder,'\','EEG_events.mat'),'EEG_event');
