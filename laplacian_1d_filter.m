@@ -1,14 +1,7 @@
-function [EEG_afterLap] = laplacian_1d_filter(EEG)
+function [EEG_afterLap] = laplacian_1d_filter(EEG_data, main_chan_ind, neighbors_arry)
     %% Returns laplacian 1d filtered EEG data
-    laplacian_filter = [-0.5, 1, -0.5];
-    EEG_afterLap = EEG.data;
-    for chan_i=1:EEG.nbchan
-        if chan_i == 3 || chan_i == 4
-            signal = EEG_afterLap(chan_i,:);
-            filtered_signal = conv(signal, laplacian_filter);
-            filtered_signal = filtered_signal(2:end);
-            filtered_signal = filtered_signal(1:end-1);  
-            EEG_afterLap(chan_i,:) = filtered_signal;
-        end
-    end 
-end 
+    EEG_afterLap = EEG_data;
+    weighted = 1/length(neighbors_arry);
+    EEG_After_laplace = EEG_data(main_chan_ind,:) - weighted.*(sum(EEG_data(neighbors_arry,:)));
+    EEG_afterLap(main_chan_ind,:)=EEG_After_laplace;
+end

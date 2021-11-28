@@ -43,9 +43,9 @@ EEG_chans(11,:) = 'CP6';
 EEG_chans(12,:) = 'O01';
 EEG_chans(13,:) = 'O02';
 % Irrelevant electrodes add more if there are
-EEG_chans(14,:) = 'P03';
-EEG_chans(15,:) = 'P03';
-EEG_chans(16,:) = 'P03';
+% Remove the bad channels
+EEG.nbchan = 13;
+EEG.data = EEG.data(1:13,:);
 
 %% (3) Low-pass filter
 originalEEG = EEG.data;
@@ -59,7 +59,7 @@ EEG = eeg_checkset( EEG );
 EEG_afterLow = EEG.data;
 
 % (4) Notch filter - this uses the ERPLAB filter
-EEG  = pop_basicfilter(EEG,  1:16 , 'Boundary', 'boundary', 'Cutoff',  50, 'Design', 'notch', 'Filter', 'PMnotch', 'Order',  180 );
+EEG  = pop_basicfilter(EEG,  1:13 , 'Boundary', 'boundary', 'Cutoff',  50, 'Design', 'notch', 'Filter', 'PMnotch', 'Order',  180 );
 EEG = eeg_checkset( EEG );
 EEG_afterBandPass = EEG.data;
 
