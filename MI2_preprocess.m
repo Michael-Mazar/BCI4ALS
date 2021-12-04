@@ -17,15 +17,31 @@ function [EEG, originalEEG, EEG_afterHigh, EEG_afterLow, EEG_afterBandPass] = MI
 % so on - but please cite properly if published.
 
 %% Some parameters (this needs to change according to your system):
-addpath 'C:\Users\mazar\Documents\MATLAB\Michael Mazar\dependencies\eeglab2021.0'           % update to your own computer path
+% addpath 'C:\Users\mazar\Documents\MATLAB\Michael Mazar\dependencies\eeglab2021.0'           % update to your own computer path
 eeglab;                                     % open EEGLAB 
 highLim = 40;                               % filter data under 40 Hz
 lowLim = 0.5;                               % filter data above 0.5 Hz
 recordingFile = strcat(recordingFolder,'\EEG.XDF');
+montage_ulracotext_path = 'montage_ultracortex.ced';
+eeglab_dir = 'C:\\Toolboxes\\eeglab2021.1';
+standard_electrodes_locations_file = strcat(eeglab_dir, '\\plugins\\dipfit\\standard_BEM\\elec\\standard_1005.elc');
 
 % (1) Load subject data (assume XDF)
 EEG = pop_loadxdf(recordingFile, 'streamtype', 'EEG', 'exclude_markerstreams', {});
 EEG.setname = 'MI_sub';
+EEG = eeg_checkset( EEG );
+
+% Load channels locations
+EEG=pop_chanedit(EEG, 'lookup', montage_ulracotext_path,'load',{montage_ulracotext_path,'filetype','autodetect'});
+EEG = eeg_checkset( EEG );
+EEG=pop_chanedit(EEG, standard_electrodes_locations_file);
+EEG = eeg_checkset( EEG );
+
+% Remove unused channels
+unused_channels = {'T8','PO3','PO4'};
+EEG = pop_select( EEG, 'nochannel', unused_channels);
+EEG = eeg_checkset( EEG );
+EEG = eeg_checkset( EEG );
 
 % (2) Update channel names - each group should update this according to
 % their own openBCI setup.
@@ -43,9 +59,6 @@ EEG_chans(11,:) = 'CP6';
 EEG_chans(12,:) = 'O01';
 EEG_chans(13,:) = 'O02';
 
-% Remove the bad channels
-EEG.nbchan = 13;
-EEG.data = EEG.data(1:13,:);
 
 % Irrelevant electrodes add more if there are
 % EEG_chans(14,:) = 'P03';
@@ -84,6 +97,8 @@ EEG.data = EEG_afterLap_C4;
 
 %try
 % (6) ICA Processing 
+EEG = clean_ica_components(EEG, 0.9);
+
 % Save the data into .mat variables on the computer
 EEG_data = EEG_afterLap_C4;            % Pre-processed EEG data
 EEG_event = EEG.event;          % Saved markers for sorting the data
