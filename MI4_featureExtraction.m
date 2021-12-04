@@ -12,15 +12,14 @@ function [] = MI4_featureExtraction(recordingFolder)
 % (harelasa@post.bgu.ac.il) in 2021. You are free to use, change, adapt and
 % so on - but please cite properly if published.
 
-
-%% Load previous variables:
+%% Load previous variables: 
 % Collect the relevant variables
 load(strcat(recordingFolder,'EEG_chans.mat'));                  % load the openBCI channel location
 load(strcat(recordingFolder,'MIData.mat'));                     % load the EEG data
 targetLabels = cell2mat(struct2cell(load(strcat(recordingFolder,'\trainingVec'))));
 
 Features2Select = 10;                                           % number of featuers for feature selection
-num4test = 2;                                                   % define how many test trials after feature extraction
+num4test = 5;                                                   % define how many test trials after feature extraction
 numClasses = length(unique(targetLabels));                      % set number of possible targets (classes)
 Fs = 120;                                                       % openBCI Cyton+Daisy by Bluetooth sample rate
 trials = size(MIData,1);                                        % get number of trials from main data variable
@@ -36,12 +35,12 @@ motorDataChan = {};
 welch = {};
 idxTarget = {};
 freq.low = 0.5;                             % INSERT the lowest freq 
-freq.high = 40;                             % INSERT the highst freq 
+freq.high = 60;                             % INSERT the highst freq 
 freq.Jump = 1;                              % SET the freq resolution
 f = freq.low:freq.Jump:freq.high;           % frequency vector
 window = 40;                                % INSERT sample size window for pwelch
 noverlap = 20;                              % INSERT number of sample overlaps for pwelch
-vizChans = [4,5];                           % INSERT which 2 channels you want to compare
+vizChans = [1,2];                           % INSERT which 2 channels you want to compare
 
 % create power spectrum figure:
 f1 = figure('name','PSD','NumberTitle','off');
@@ -93,6 +92,7 @@ for trial=1:size(leftClass,1)
 end
 
 vizTrial = 5;       % cherry-picked!
+
 figure;
 subplot(1,2,1)      % show a single trial before CSP seperation
 scatter3(squeeze(leftClass(vizTrial,1,:)),squeeze(leftClass(vizTrial,2,:)),squeeze(leftClass(vizTrial,3,:)),'b'); hold on
@@ -156,8 +156,7 @@ for trial = 1:trials                                % run over all the trials
         % Find the power for each of frequencies defined earlier
         for feature = 1:numSpectralFeatures                 % run over all spectral band power features from the section above
             % Extract features: bandpower +-1 Hz around each target frequency
-            floored_time_indices = floor(times{feature});
-            MIFeaturesLabel(trial,channel,n) = bandpower(squeeze(MIData(trial,channel,floored_time_indices)),Fs,bands{feature});
+            MIFeaturesLabel(trial,channel,n) = bandpower(squeeze(MIData(trial,channel,times{feature})),Fs,bands{feature});
             n = n+1;            
         end
         disp(strcat('Extracted Powerbands from electrode:',EEG_chans(channel,:)))
@@ -321,7 +320,6 @@ title('Feature matrix visualization')
 impixelinfo;
 % Get the current colormap
 cmap = colormap;
-
 
 end
 
