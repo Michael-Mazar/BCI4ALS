@@ -12,12 +12,9 @@ function [] = MI4_featureExtraction(recordingFolder)
 % (harelasa@post.bgu.ac.il) in 2021. You are free to use, change, adapt and
 % so on - but please cite properly if published.
 
+
 %% Load previous variables:
-
-
-%OSHER: remove later - this overrides the function's input
-recordingFolder ='D:\BCI4ALS\data\';
-
+% Collect the relevant variables
 load(strcat(recordingFolder,'EEG_chans.mat'));                  % load the openBCI channel location
 load(strcat(recordingFolder,'MIData.mat'));                     % load the EEG data
 targetLabels = cell2mat(struct2cell(load(strcat(recordingFolder,'\trainingVec'))));
@@ -25,13 +22,15 @@ targetLabels = cell2mat(struct2cell(load(strcat(recordingFolder,'\trainingVec'))
 Features2Select = 10;                                           % number of featuers for feature selection
 num4test = 2;                                                   % define how many test trials after feature extraction
 numClasses = length(unique(targetLabels));                      % set number of possible targets (classes)
-Fs = 125;                                                       % openBCI Cyton+Daisy by Bluetooth sample rate
+Fs = 120;                                                       % openBCI Cyton+Daisy by Bluetooth sample rate
 trials = size(MIData,1);                                        % get number of trials from main data variable
 [R, C] = size(EEG_chans);                                       % get EEG_chans (char matrix) size - rows and columns
 chanLocs = reshape(EEG_chans',[1, R*C]);                        % reshape into a vector in the correct order
 numChans = size(MIData,2);                                      % get number of channels from main data variable
 
 %% Visual Feature Selection: Power Spectrum
+% Observe changes in power spectrum - where are these changes observed in
+% the different power spectrum 
 % init cells for  Power Spectrum display
 motorDataChan = {};
 welch = {};
@@ -70,6 +69,7 @@ for chan = 1:numChans
         clear multiPSD psd
     end
 end
+
 % manually plot (surf) mean spectrogram for channels C4 + C3:
 mySpectrogram(t,spectFreq,totalSpect,numClasses,vizChans,EEG_chans)
 
@@ -91,7 +91,8 @@ for trial=1:size(leftClass,1)
     overallLeft = [overallLeft squeeze(leftClass(trial,:,:))];
     overallRight = [overallRight squeeze(rightClass(trial,:,:))];
 end
-vizTrial = 5;       % cherry-picked! % OSHER - what is this?
+
+vizTrial = 5;       % cherry-picked!
 figure;
 subplot(1,2,1)      % show a single trial before CSP seperation
 scatter3(squeeze(leftClass(vizTrial,1,:)),squeeze(leftClass(vizTrial,2,:)),squeeze(leftClass(vizTrial,3,:)),'b'); hold on
@@ -104,6 +105,7 @@ zlabel('channel 3')
 % find mixing matrix (W) for all trials
 [W, lambda, A] = csp(overallLeft, overallRight);
 [Wviz, lambdaViz, Aviz] = csp(squeeze(rightClass(vizTrial,:,:)), squeeze(leftClass(vizTrial,:,:)));
+% The main function which does all the work
 % apply mixing matrix on available data (for visualization)
 leftClassCSP = (Wviz'*squeeze(leftClass(vizTrial,:,:)));
 rightClassCSP = (Wviz'*squeeze(rightClass(vizTrial,:,:)));
@@ -120,6 +122,9 @@ zlabel('CSP dimension 3')
 clear leftClassCSP rightClassCSP Wviz lambdaViz Aviz
 
 %% Spectral frequencies and times for bandpower features:
+% Collect times and frequencies which were most effective for motor imagery
+% Take it with a grain of salt, Is unstable through time and very
+% individual
 % frequency bands
 bands{1} = [15.5,18.5];
 bands{2} = [8,10.5];
@@ -141,12 +146,14 @@ MIFeaturesLabel = NaN(trials,numChans,numSpectralFeatures); % init features + la
 for trial = 1:trials                                % run over all the trials
     
     % CSP: using W computed above for all channels at once
+    % Extrac the variance of CSP
     temp = var((W'*squeeze(MIData(trial,:,:)))');   % apply the CSP filter on the current trial EEG data
-    CSPFeatures(trial,:) = temp(1:3);               % add the variance from the first 3 eigenvalues
+    CSPFeatures(trial,:) = temp(1:3);               % add the variance from the first 3 eigenvalues - the eigen values which explain the most of the data
     clear temp                                      % clear the variable to free it for the next loop
     
     for channel = 1:numChans                        % run over all the electrodes (channels)
         n = 1;                                      % start a new feature index
+        % Find the power for each of frequencies defined earlier
         for feature = 1:numSpectralFeatures                 % run over all spectral band power features from the section above
             % Extract features: bandpower +-1 Hz around each target frequency
             floored_time_indices = floor(times{feature});
@@ -240,10 +247,10 @@ for trial = 1:trials                                % run over all the trials
     end
 end
 
-% z-score all the features
+% z-score all the features - make sure there are not outlier
 MIFeaturesLabel = zscore(MIFeaturesLabel);
 
-% Reshape into 2-D matrix
+% Reshape into 2-D matrix - with this data we label right or left hands 
 MIFeatures = reshape(MIFeaturesLabel,trials,[]);
 MIFeatures = [CSPFeatures MIFeatures];              % add the CSP features to the overall matrix
 AllDataInFeatures = MIFeatures;
@@ -253,7 +260,8 @@ save(strcat(recordingFolder,'\AllDataInFeatures.mat'),'AllDataInFeatures');
 
 idleIdx = find(targetLabels == 1);                                  % find idle trials
 leftIdx = find(targetLabels == 2);                                  % find left trials
-rightIdx = find(targetLabels == 3);                                 % find right trials
+rightIdx = find(targetLabels == 3);      
+% find right trials
 
 testIdx = randperm(length(idleIdx),num4test);                       % picking test index randomly
 testIdx = [idleIdx(testIdx) leftIdx(testIdx) rightIdx(testIdx)];    % taking the test index from each class
@@ -270,9 +278,12 @@ LabelTrain = targetLabels;
 LabelTrain(testIdx) = [];                   % delete the test trials from the labels matrix, and keep only the train labels
 
 %% Feature Selection (using neighborhood component analysis)
+% which of the features provide the best explanation
+
 class = fscnca(FeaturesTrain,LabelTrain);   % feature selection
 % sorting the weights in desending order and keeping the indexs
-[~,selected] = sort(class.FeatureWeights,'descend');
+[wts,selected] = sort(class.FeatureWeights,'descend');
+disp(wts)
 % taking only the specified number of features with the largest weights
 SelectedIdx = selected(1:Features2Select);
 FeaturesTrainSelected = FeaturesTrain(:,SelectedIdx);       % updating the matrix feature
@@ -287,19 +298,30 @@ save(strcat(recordingFolder,'\LabelTrain.mat'),'LabelTrain');
 
 disp('Successfuly extracted features!');
 
-%% Osher: remarks:
-% for each i=1:num2test, point of *each label* is randomally selected. 
-% therefore, the number of test set is num2test*labelsNum
+%% Matrix visualization 
+figure;
+num_channels = 13;
+num_features_per_channel = 14;
+% weightMatrix = zeros(num_channels, num_features_per_channel);
+weightMatrix = reshape(class.FeatureWeights(4:end), num_features_per_channel, num_channels).';
+features_headers = {'15.5-18.5 band', '8-10.5 band', '10-15.5 band', '17.5-20.5 band', ...
+    '12.5-30 band', 'Root', 'Moment', 'Edge', ...
+    'Entropy', 'Slope', 'Intercept', 'Mean freq', 'Obw', 'Powerbw'};
+channel_names = {'C03','C04','C0Z','FC1',...
+    'FC2','FC5','F06','CP1', 'CP2',...
+    'CP5','CP6','O01','O02'};
+imagesc(weightMatrix);
+xticks([1:14])
+yticks([1:13])
+xticklabels(features_headers)
+xtickangle(70)
+yticklabels(channel_names)
+title('Feature matrix visualization')
+% Set up where it will show x, y, and value in status line.
+impixelinfo;
+% Get the current colormap
+cmap = colormap;
 
-% (similarily, training set's size is (datasetsize-num2test)*labelsNum
-
-% 227 features (with the default values in this script), 10
-% of them are selected
-
-% Each feature is a "combination" of the feature "type", channel and
-% frequency (excluding the CSP features which, to the best of my
-% understanding, are in the last 3 columns of the features matrix
-% (concatenated to the frequency-based features)
 
 end
 
