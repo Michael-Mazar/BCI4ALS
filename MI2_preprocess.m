@@ -17,13 +17,13 @@ function [EEG, originalEEG, EEG_afterHigh, EEG_afterLow, EEG_afterBandPass] = MI
 % so on - but please cite properly if published.
 
 %% Some parameters (this needs to change according to your system):
-% addpath 'C:\Users\mazar\Documents\MATLAB\Michael Mazar\dependencies\eeglab2021.0'           % update to your own computer path
+eeglab_dir = 'C:\Users\mazar\Documents\MATLAB\Michael Mazar\dependencies\eeglab2021.0' 
+addpath  eeglab_dir          % update to your own computer path
 eeglab;                                     % open EEGLAB 
 highLim = 40;                               % filter data under 40 Hz
 lowLim = 0.5;                               % filter data above 0.5 Hz
 recordingFile = strcat(recordingFolder,'\EEG.XDF');
 montage_ulracotext_path = 'montage_ultracortex.ced';
-eeglab_dir = 'C:\\Toolboxes\\eeglab2021.1';
 standard_electrodes_locations_file = strcat(eeglab_dir, '\\plugins\\dipfit\\standard_BEM\\elec\\standard_1005.elc');
 
 % (1) Load subject data (assume XDF)
