@@ -9,8 +9,7 @@ function [test_results] = MI5_modelTraining(recordingFolder)
 % so on - but please cite properly if published.
 
 %% Read the features & labels 
-
-FeaturesTrain = cell2mat(struct2cell(load(strcat(recordingFolder,'\FeaturesSelected.mat'))));   % features for train set
+FeaturesTrain = cell2mat(struct2cell(load(strcat(recordingFolder,'\FeaturesTrainSelected.mat'))));   % features for train set
 LabelTrain = cell2mat(struct2cell(load(strcat(recordingFolder,'\LabelTrain'))));                % label vector for train set
 
 % label vector
@@ -31,7 +30,9 @@ W = LDA(FeaturesTrain,LabelTrain);                                              
 
 %% Test data
 % test prediction from linear classifier
-test_results = (testPrediction'-LabelTest);                                         % prediction - true labels = accuracy
+test_results = (testPrediction'-LabelTest);  
+%%
+% prediction - true labels = accuracy
 test_results = (sum(test_results == 0)/length(LabelTest))*100;
 disp(['test accuracy - ' num2str(test_results) '%'])
 

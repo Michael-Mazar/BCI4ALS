@@ -17,7 +17,7 @@ function [EEG, originalEEG, EEG_afterHigh, EEG_afterLow, EEG_afterBandPass, EEG_
 % so on - but please cite properly if published.
 
 %% Some parameters (this needs to change according to your system):
-addpath 'C:\Users\mazar\Documents\MATLAB\Michael Mazar\dependencies\eeglab2021.0'           % update to your own computer path
+addpath 'C:\Users\Raz\Study\Cognition_Science\BCI4ALS\eeglab2021.1'           % update to your own computer path
 eeglab;                                     % open EEGLAB 
 highLim = 40;                               % filter data under 40 Hz
 lowLim = 0.5;                               % filter data above 0.5 Hz

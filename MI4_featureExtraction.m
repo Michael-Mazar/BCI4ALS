@@ -13,8 +13,9 @@ function [] = MI4_featureExtraction(recordingFolder)
 % so on - but please cite properly if published.
 
 %% Load previous variables:
-load(strcat(recordingFolder,'EEG_chans.mat'));                  % load the openBCI channel location
-load(strcat(recordingFolder,'MIData.mat'));                     % load the EEG data
+recordingFolder = 'C:\Users\Raz\Study\Cognition_Science\BCI4ALS\Recordings\14_11_21';
+load(strcat(recordingFolder,'\EEG_chans.mat'));                  % load the openBCI channel location
+load(strcat(recordingFolder,'\MIData.mat'));                     % load the EEG data
 targetLabels = cell2mat(struct2cell(load(strcat(recordingFolder,'\trainingVec'))));
 
 Features2Select = 10;                                           % number of featuers for feature selection
@@ -86,7 +87,7 @@ for trial=1:size(leftClass,1)
     overallLeft = [overallLeft squeeze(leftClass(trial,:,:))];
     overallRight = [overallRight squeeze(rightClass(trial,:,:))];
 end
-vizTrial = 11;       % cherry-picked!
+vizTrial = 2;       % cherry-picked!
 figure;
 subplot(1,2,1)      % show a single trial before CSP seperation
 scatter3(squeeze(leftClass(vizTrial,1,:)),squeeze(leftClass(vizTrial,2,:)),squeeze(leftClass(vizTrial,3,:)),'b'); hold on
@@ -121,7 +122,9 @@ bands{2} = [8,10.5];
 bands{3} = [10,15.5];
 bands{4} = [17.5,20.5];
 bands{5} = [12.5,30];
-    
+
+fearures_headers = ['15.5-18.5', '8-10.5', '10-15.5', '17.5-20.5', '12.5-30', 'Root', 'Moment', 'Edge', 'Entropy', 'Slope', 'Intercept', 'Meanfreq', 'Obw', 'Powerbw'];
+
 % times of frequency band features
 times{1} = (1*Fs : 3*Fs);
 times{2} = (3*Fs : 4.5*Fs);
@@ -132,6 +135,7 @@ times{5} = (2.5*Fs : 4*Fs);
 numSpectralFeatures = length(bands);                        % how many features exist overall 
 
 %% Extract features 
+
 MIFeaturesLabel = NaN(trials,numChans,numSpectralFeatures); % init features + labels matrix
 for trial = 1:trials                                % run over all the trials
     
@@ -144,7 +148,9 @@ for trial = 1:trials                                % run over all the trials
         n = 1;                                      % start a new feature index
         for feature = 1:numSpectralFeatures                 % run over all spectral band power features from the section above
             % Extract features: bandpower +-1 Hz around each target frequency
-            MIFeaturesLabel(trial,channel,n) = bandpower(squeeze(MIData(trial,channel,times{feature})),Fs,bands{feature});
+            floored_time_indices = floor(times{feature});
+            %MIFeaturesLabel(trial,channel,n) = bandpower(squeeze(MIData(trial,channel,times{feature})),Fs,bands{feature});
+            MIFeaturesLabel(trial,channel,n) = bandpower(squeeze(MIData(trial,channel,floored_time_indices)),Fs,bands{feature});
             n = n+1;            
         end
         disp(strcat('Extracted Powerbands from electrode:',EEG_chans(channel,:)))
@@ -157,7 +163,7 @@ for trial = 1:trials                                % run over all the trials
         normlizedMatrix = welch{channel}(:,trial)./pfTot;   % Normalize the Pwelch matrix by dividing the matrix in its sum for each trial
         disp(strcat('Extracted Normalized Pwelch Matrix from electrode:',EEG_chans(channel,:)))
         
-        
+
         % Root Total Power
         MIFeaturesLabel(trial,channel,n) = sqrt(pfTot);     % Square-root of the total power
         n = n + 1;
@@ -202,7 +208,6 @@ for trial = 1:trials                                % run over all the trials
         n = n + 1;
         disp(strcat('Extracted Slope from electrode:',EEG_chans(channel,:)))
         
-        
         % Intercept
         % the slope is in each double value in the matrix
         MIFeaturesLabel(trial,channel,n)=pFitLiner(2:2:length(pFitLiner));
@@ -223,8 +228,7 @@ for trial = 1:trials                                % run over all the trials
         % The frequencies, f, correspond to the estimates in pxx.
         MIFeaturesLabel(trial,channel,n) = obw(normlizedMatrix,f);
         n = n + 1;
-        disp(strcat('Extracted Occupied bandwidth from electrode:',EEG_chans(channel,:)))
-        
+        disp(strcat('Extracted Occupied bandwidth from electrode:',EEG_chans(channel,:)))        
         
         % Power bandwidth
         MIFeaturesLabel(trial,channel,n) = powerbw(normlizedMatrix,Fs);
@@ -271,6 +275,19 @@ class = fscnca(FeaturesTrain,LabelTrain);   % feature selection
 SelectedIdx = selected(1:Features2Select);
 FeaturesTrainSelected = FeaturesTrain(:,SelectedIdx);       % updating the matrix feature
 FeaturesTest = FeaturesTest(:,SelectedIdx);                 % updating the matrix feature
+
+% create mat
+%% Matrix visualization 
+num_channels = 16;
+num_features_per_channel = 14;
+% weightMatrix = zeros(num_channels, num_features_per_channel);
+weightMatrix = reshape(class.FeatureWeights(4:end), num_features_per_channel, num_channels).';
+imagesc(weightMatrix);
+% Set up where it will show x, y, and value in status line.
+impixelinfo;
+% Get the current colormap
+cmap = colormap;
+%%
 % saving
 save(strcat(recordingFolder,'\FeaturesTrain.mat'),'FeaturesTrain');
 save(strcat(recordingFolder,'\FeaturesTrainSelected.mat'),'FeaturesTrainSelected');
