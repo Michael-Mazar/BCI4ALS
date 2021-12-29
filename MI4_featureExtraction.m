@@ -1,4 +1,4 @@
-function [] = MI4_featureExtraction(recordingFolder)
+function [] = MI4_featureExtraction(recordingFolder, MIData, EEG_chans, targetLabels, bands, times, params)
 %% This function extracts features for the machine learning process.
 % Starts by visualizing the data (power spectrum) to find the best powerbands.
 % Next section computes the best common spatial patterns from all available
@@ -6,31 +6,20 @@ function [] = MI4_featureExtraction(recordingFolder)
 % This includes a non-exhaustive list of possible features (commented below).
 % At the bottom there is a simple feature importance test that chooses the
 % best features and saves them for model training.
-
-
 %% This code is part of the BCI-4-ALS Course written by Asaf Harel
 % (harelasa@post.bgu.ac.il) in 2021. You are free to use, change, adapt and
 % so on - but please cite properly if published.
-
-%% Load previous variables: 
-% Collect the relevant variables
-load(strcat(recordingFolder,'\EEG_chans.mat'));                  % load the openBCI channel location
-load(strcat(recordingFolder,'\MIData.mat'));                     % load the EEG data
-targetLabels = cell2mat(struct2cell(load(strcat(recordingFolder,'\trainingVec'))));
-
-Features2Select = 10;                                           % number of featuers for feature selection
-num4test = 5;                                                   % define how many test trials after feature extraction
+%% Load variables: 
+Features2Select = params.select;                                           % number of featuers for feature selection
+num4test = params.test;                                                   % define how many test trials after feature extraction
 numClasses = length(unique(targetLabels));                      % set number of possible targets (classes)
-Fs = 120;                                                       % openBCI Cyton+Daisy by Bluetooth sample rate
+Fs = params.FS;                                                       % openBCI Cyton+Daisy by Bluetooth sample rate
 trials = size(MIData,1);                                        % get number of trials from main data variable
-[R, C] = size(EEG_chans);                                       % get EEG_chans (char matrix) size - rows and columns
-chanLocs = reshape(EEG_chans',[1, R*C]);                        % reshape into a vector in the correct order
 numChans = size(MIData,2);                                      % get number of channels from main data variable
-
 %% Visual Feature Selection: Power Spectrum
 % Observe changes in power spectrum - where are these changes observed in
 % the different power spectrum 
-% init cells for  Power Spectrum display
+% init cells for Power Spectrum display
 motorDataChan = {};
 welch = {};
 idxTarget = {};
@@ -41,7 +30,6 @@ f = freq.low:freq.Jump:freq.high;           % frequency vector
 window = 40;                                % INSERT sample size window for pwelch
 noverlap = 20;                              % INSERT number of sample overlaps for pwelch
 vizChans = [1,2];                           % INSERT which 2 channels you want to compare
-
 % create power spectrum figure:
 f1 = figure('name','PSD','NumberTitle','off');
 sgtitle(['Power Spectrum For The Choosen Electrode']);
@@ -72,12 +60,6 @@ end
 % manually plot (surf) mean spectrogram for channels C4 + C3:
 mySpectrogram(t,spectFreq,totalSpect,numClasses,vizChans,EEG_chans)
 
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%% Add your own data visualization here %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
 %% Common Spatial Patterns
 % create a spatial filter using available EEG & labels
 % begin by splitting into two classes:
@@ -91,8 +73,7 @@ for trial=1:size(leftClass,1)
     overallRight = [overallRight squeeze(rightClass(trial,:,:))];
 end
 
-vizTrial = 5;       % cherry-picked!
-
+vizTrial = params.vizTrial;       % cherry-picked!
 figure;
 subplot(1,2,1)      % show a single trial before CSP seperation
 scatter3(squeeze(leftClass(vizTrial,1,:)),squeeze(leftClass(vizTrial,2,:)),squeeze(leftClass(vizTrial,3,:)),'b'); hold on
@@ -121,29 +102,8 @@ zlabel('CSP dimension 3')
 
 clear leftClassCSP rightClassCSP Wviz lambdaViz Aviz
 
-%% Spectral frequencies and times for bandpower features:
-% Collect times and frequencies which were most effective for motor imagery
-% Take it with a grain of salt, Is unstable through time and very
-% individual
-% frequency bands
-bands{1} = [15.5,18.5];
-bands{2} = [8,10.5];
-bands{3} = [10,15.5];
-bands{4} = [17.5,20.5];
-bands{5} = [12.5,30];
-
-fearures_headers = ['15.5-18.5', '8-10.5', '10-15.5', '17.5-20.5', '12.5-30', 'Root', 'Moment', 'Edge', 'Entropy', 'Slope', 'Intercept', 'Meanfreq', 'Obw', 'Powerbw'];
-
-% times of frequency band features
-times{1} = (1*Fs : 3*Fs);
-times{2} = (3*Fs : 4.5*Fs);
-times{3} = (4.25*Fs : size(MIData,3));
-times{4} = (2*Fs : 2.75*Fs);
-times{5} = (2.5*Fs : 4*Fs);
-
-numSpectralFeatures = length(bands);                        % how many features exist overall 
-
 %% Extract features 
+numSpectralFeatures = length(bands);                        % how many features exist overall 
 
 MIFeaturesLabel = NaN(trials,numChans,numSpectralFeatures); % init features + labels matrix
 for trial = 1:trials                                % run over all the trials
@@ -250,7 +210,9 @@ for trial = 1:trials                                % run over all the trials
 end
 
 % z-score all the features - make sure there are not outlier
-MIFeaturesLabel = zscore(MIFeaturesLabel);
+if params.z == 1
+    MIFeaturesLabel = zscore(MIFeaturesLabel);
+end
 
 % Reshape into 2-D matrix - with this data we label right or left hands 
 MIFeatures = reshape(MIFeaturesLabel,trials,[]);
@@ -292,16 +254,6 @@ FeaturesTrainSelected = FeaturesTrain(:,SelectedIdx);       % updating the matri
 FeaturesTest = FeaturesTest(:,SelectedIdx);                 % updating the matrix feature
 
 % create mat
-%% Matrix visualization 
-num_channels = 16;
-num_features_per_channel = 14;
-% weightMatrix = zeros(num_channels, num_features_per_channel);
-weightMatrix = reshape(class.FeatureWeights(4:end), num_features_per_channel, num_channels).';
-imagesc(weightMatrix);
-% Set up where it will show x, y, and value in status line.
-impixelinfo;
-% Get the current colormap
-cmap = colormap;
 %%
 % saving
 save(strcat(recordingFolder,'\FeaturesTrain.mat'),'FeaturesTrain');
@@ -315,27 +267,30 @@ disp('Successfuly extracted features!');
 
 %% Matrix visualization 
 figure;
-num_channels = 13;
 num_features_per_channel = 14;
-% weightMatrix = zeros(num_channels, num_features_per_channel);
-weightMatrix = reshape(class.FeatureWeights(4:end), num_features_per_channel, num_channels).';
-features_headers = {'15.5-18.5 band', '8-10.5 band', '10-15.5 band', '17.5-20.5 band', ...
-    '12.5-30 band', 'Root', 'Moment', 'Edge', ...
-    'Entropy', 'Slope', 'Intercept', 'Mean freq', 'Obw', 'Powerbw'};
-channel_names = {'C03','C04','C0Z','FC1',...
-    'FC2','FC5','F06','CP1', 'CP2',...
-    'CP5','CP6','O01','O02'};
+weightMatrix = reshape(class.FeatureWeights(4:end), num_features_per_channel, numChans).';
+for i=1:5
+    features_headers{i} = string(bands{i}(1)) + '-' + string(bands{i}(2)) + ' band';
+end
+features_headers{6} = "Root";
+features_headers{7} = "Moment";
+features_headers{8} = "Edge";
+features_headers{9} = "Entropy";
+features_headers{10} = "Slope";
+features_headers{11} = "Intercept";
+features_headers{12} = "Mean freq";
+features_headers{13} = "Obw";
+features_headers{14} = "Powerbw";
+%features_headers = {'15.5-18.5 band', '8-10.5 band', '10-15.5 band', '17.5-20.5 band', ...
+%    '12.5-30 band', 'Root', 'Moment', 'Edge', ...
+%    'Entropy', 'Slope', 'Intercept', 'Mean freq', 'Obw', 'Powerbw'};
 imagesc(weightMatrix);
-xticks([1:14])
-yticks([1:13])
+xticks([1:num_features_per_channel])
+yticks([1:numChans])
 xticklabels(features_headers)
 xtickangle(70)
-yticklabels(channel_names)
+yticklabels(EEG_chans)
 title('Feature matrix visualization')
 % Set up where it will show x, y, and value in status line.
 impixelinfo;
-% Get the current colormap
-cmap = colormap;
-
 end
-
