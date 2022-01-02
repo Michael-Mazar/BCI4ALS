@@ -1,4 +1,4 @@
-function [] = MI4_featureExtraction(recordingFolder)
+function [] = MI4_featureExtraction(recordingFolder, MIData, EEG_chans, targetLabels, bands, times, features_headers, params, feature_setting)
 %% This function extracts features for the machine learning process.
 % Starts by visualizing the data (power spectrum) to find the best powerbands.
 % Next section computes the best common spatial patterns from all available
@@ -6,31 +6,20 @@ function [] = MI4_featureExtraction(recordingFolder)
 % This includes a non-exhaustive list of possible features (commented below).
 % At the bottom there is a simple feature importance test that chooses the
 % best features and saves them for model training.
-
-
 %% This code is part of the BCI-4-ALS Course written by Asaf Harel
 % (harelasa@post.bgu.ac.il) in 2021. You are free to use, change, adapt and
 % so on - but please cite properly if published.
-
-%% Load previous variables: 
-% Collect the relevant variables
-load(strcat(recordingFolder,'EEG_chans.mat'));                  % load the openBCI channel location
-load(strcat(recordingFolder,'MIData.mat'));                     % load the EEG data
-targetLabels = cell2mat(struct2cell(load(strcat(recordingFolder,'\trainingVec'))));
-
-Features2Select = 10;                                           % number of featuers for feature selection
-num4test = 5;                                                   % define how many test trials after feature extraction
+%% Load variables: 
+Features2Select = params.select;                                           % number of featuers for feature selection
+num4test = params.test;                                                   % define how many test trials after feature extraction
 numClasses = length(unique(targetLabels));                      % set number of possible targets (classes)
-Fs = 120;                                                       % openBCI Cyton+Daisy by Bluetooth sample rate
+Fs = params.FS;                                                       % openBCI Cyton+Daisy by Bluetooth sample rate
 trials = size(MIData,1);                                        % get number of trials from main data variable
-[R, C] = size(EEG_chans);                                       % get EEG_chans (char matrix) size - rows and columns
-chanLocs = reshape(EEG_chans',[1, R*C]);                        % reshape into a vector in the correct order
 numChans = size(MIData,2);                                      % get number of channels from main data variable
-
 %% Visual Feature Selection: Power Spectrum
 % Observe changes in power spectrum - where are these changes observed in
 % the different power spectrum 
-% init cells for  Power Spectrum display
+% init cells for Power Spectrum display
 motorDataChan = {};
 welch = {};
 idxTarget = {};
@@ -41,7 +30,6 @@ f = freq.low:freq.Jump:freq.high;           % frequency vector
 window = 40;                                % INSERT sample size window for pwelch
 noverlap = 20;                              % INSERT number of sample overlaps for pwelch
 vizChans = [1,2];                           % INSERT which 2 channels you want to compare
-
 % create power spectrum figure:
 f1 = figure('name','PSD','NumberTitle','off');
 sgtitle(['Power Spectrum For The Choosen Electrode']);
@@ -72,12 +60,6 @@ end
 % manually plot (surf) mean spectrogram for channels C4 + C3:
 mySpectrogram(t,spectFreq,totalSpect,numClasses,vizChans,EEG_chans)
 
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%% Add your own data visualization here %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
 %% Common Spatial Patterns
 % create a spatial filter using available EEG & labels
 % begin by splitting into two classes:
@@ -91,8 +73,7 @@ for trial=1:size(leftClass,1)
     overallRight = [overallRight squeeze(rightClass(trial,:,:))];
 end
 
-vizTrial = 5;       % cherry-picked!
-
+vizTrial = params.vizTrial;       % cherry-picked!
 figure;
 subplot(1,2,1)      % show a single trial before CSP seperation
 scatter3(squeeze(leftClass(vizTrial,1,:)),squeeze(leftClass(vizTrial,2,:)),squeeze(leftClass(vizTrial,3,:)),'b'); hold on
@@ -121,27 +102,13 @@ zlabel('CSP dimension 3')
 
 clear leftClassCSP rightClassCSP Wviz lambdaViz Aviz
 
-%% Spectral frequencies and times for bandpower features:
-% Collect times and frequencies which were most effective for motor imagery
-% Take it with a grain of salt, Is unstable through time and very
-% individual
-% frequency bands
-bands{1} = [15.5,18.5];
-bands{2} = [8,10.5];
-bands{3} = [10,15.5];
-bands{4} = [17.5,20.5];
-bands{5} = [12.5,30];
-    
-% times of frequency band features
-times{1} = (1*Fs : 3*Fs);
-times{2} = (3*Fs : 4.5*Fs);
-times{3} = (4.25*Fs : size(MIData,3));
-times{4} = (2*Fs : 2.75*Fs);
-times{5} = (2.5*Fs : 4*Fs);
-
-numSpectralFeatures = length(bands);                        % how many features exist overall 
-
 %% Extract features 
+if feature_setting.Bands
+    numSpectralFeatures = length(bands);                        % how many features exist overall 
+else
+    numSpectralFeatures = 0;
+end
+
 MIFeaturesLabel = NaN(trials,numChans,numSpectralFeatures); % init features + labels matrix
 for trial = 1:trials                                % run over all the trials
     
@@ -154,13 +121,16 @@ for trial = 1:trials                                % run over all the trials
     for channel = 1:numChans                        % run over all the electrodes (channels)
         n = 1;                                      % start a new feature index
         % Find the power for each of frequencies defined earlier
-        for feature = 1:numSpectralFeatures                 % run over all spectral band power features from the section above
-            % Extract features: bandpower +-1 Hz around each target frequency
-            MIFeaturesLabel(trial,channel,n) = bandpower(squeeze(MIData(trial,channel,times{feature})),Fs,bands{feature});
-            n = n+1;            
+        if feature_setting.Bands
+            for feature = 1:numSpectralFeatures                 % run over all spectral band power features from the section above
+                % Extract features: bandpower +-1 Hz around each target frequency
+                floored_time_indices = floor(times{feature});
+                %MIFeaturesLabel(trial,channel,n) = bandpower(squeeze(MIData(trial,channel,times{feature})),Fs,bands{feature});
+                MIFeaturesLabel(trial,channel,n) = bandpower(squeeze(MIData(trial,channel,floored_time_indices)),Fs,bands{feature});
+                n = n+1;            
+            end
+            disp(strcat('Extracted Powerbands from electrode:',EEG_chans(channel,:)))
         end
-        disp(strcat('Extracted Powerbands from electrode:',EEG_chans(channel,:)))
-        
         
         % NOVEL Features - an explanation for each can be found in the class presentation folder
         
@@ -169,85 +139,95 @@ for trial = 1:trials                                % run over all the trials
         normlizedMatrix = welch{channel}(:,trial)./pfTot;   % Normalize the Pwelch matrix by dividing the matrix in its sum for each trial
         disp(strcat('Extracted Normalized Pwelch Matrix from electrode:',EEG_chans(channel,:)))
         
+        if feature_setting.Root
+            % Root Total Power
+            MIFeaturesLabel(trial,channel,n) = sqrt(pfTot);     % Square-root of the total power
+            n = n + 1;
+            disp(strcat('Extracted Root Total Power from electrode:',EEG_chans(channel,:)))
+        end
         
-        % Root Total Power
-        MIFeaturesLabel(trial,channel,n) = sqrt(pfTot);     % Square-root of the total power
-        n = n + 1;
-        disp(strcat('Extracted Root Total Power from electrode:',EEG_chans(channel,:)))
+        if feature_setting.Moment
+            % Spectral Moment
+            MIFeaturesLabel(trial,channel,n) = sum(normlizedMatrix.*f'); % Calculate the spectral moment
+            n = n + 1;
+            disp(strcat('Extracted Normalized Pwelch Matrix from electrode:',EEG_chans(channel,:)))
+        end 
         
+        if feature_setting.Edge
+            % Spectral Edge
+            probfunc = cumsum(normlizedMatrix);                 % Create matrix of cumulative sum
+            % frequency that 90% of the power resides below it and 10% of the power resides above it
+            valuesBelow = @(z)find(probfunc(:,z)<=0.9);         % Create local function
+            % apply function to each element of normlizedMatrix
+            fun4Values = arrayfun(valuesBelow, 1:size(normlizedMatrix',1), 'un',0);
+            lengthfunc = @(y)length(fun4Values{y})+1;           % Create local function for length
+            % apply function to each element of normlizedMatrix
+            fun4length = cell2mat(arrayfun(lengthfunc, 1:size(normlizedMatrix',1), 'un',0));
+            MIFeaturesLabel(trial,channel,n) = f(fun4length);   % Insert it to the featurs matrix
+            n = n + 1;
+            disp(strcat('Extracted Spectral Edge from electrode:',EEG_chans(channel,:)))
+        end 
         
-        % Spectral Moment
-        MIFeaturesLabel(trial,channel,n) = sum(normlizedMatrix.*f'); % Calculate the spectral moment
-        n = n + 1;
-        disp(strcat('Extracted Normalized Pwelch Matrix from electrode:',EEG_chans(channel,:)))
+        if feature_setting.Entropy
+            % Spectral Entropy
+            MIFeaturesLabel(trial,channel,n) = -sum(normlizedMatrix.*log2(normlizedMatrix)); % calculate the spectral entropy
+            n = n + 1;
+            disp(strcat('Extracted Spectral Entropy from electrode:',EEG_chans(channel,:)))
+        end
         
+        if feature_setting.Slope
+            % Slope
+            transposeMat = (welch{channel}(:,trial)');          % transpose matrix
+            % create local function for computing the polyfit on the transposed matrix and the frequency vector
+            FitFH = @(k)polyfit(log(f(1,:)),log(transposeMat(k,:)),1);
+            % convert the cell that gets from the local func into matrix, perform the
+            % function on transposeMat, the slope is in each odd value in the matrix
+            % Apply function to each element of tansposeMat
+            pFitLiner = cell2mat(arrayfun(FitFH, 1:size(transposeMat,1), 'un',0));
+            MIFeaturesLabel(trial,channel,n)=pFitLiner(1:2 :length(pFitLiner));
+            n = n + 1;
+            disp(strcat('Extracted Slope from electrode:',EEG_chans(channel,:)))
+        end
         
-        % Spectral Edge
-        probfunc = cumsum(normlizedMatrix);                 % Create matrix of cumulative sum
-        % frequency that 90% of the power resides below it and 10% of the power resides above it
-        valuesBelow = @(z)find(probfunc(:,z)<=0.9);         % Create local function
-        % apply function to each element of normlizedMatrix
-        fun4Values = arrayfun(valuesBelow, 1:size(normlizedMatrix',1), 'un',0);
-        lengthfunc = @(y)length(fun4Values{y})+1;           % Create local function for length
-        % apply function to each element of normlizedMatrix
-        fun4length = cell2mat(arrayfun(lengthfunc, 1:size(normlizedMatrix',1), 'un',0));
-        MIFeaturesLabel(trial,channel,n) = f(fun4length);   % Insert it to the featurs matrix
-        n = n + 1;
-        disp(strcat('Extracted Spectral Edge from electrode:',EEG_chans(channel,:)))
+        if feature_setting.Intercept
+            % Intercept
+            % the slope is in each double value in the matrix
+            MIFeaturesLabel(trial,channel,n)=pFitLiner(2:2:length(pFitLiner));
+            n= n + 1;
+            disp(strcat('Extracted Intercept from electrode:',EEG_chans(channel,:)))
+        end
         
+        if feature_setting.Mean_freq
+            % Mean Frequency
+            % returns the mean frequency of a power spectral density (PSD) estimate, pxx.
+            % The frequencies, f, correspond to the estimates in pxx.
+            MIFeaturesLabel(trial,channel,n) = meanfreq(normlizedMatrix,f);
+            n = n + 1;
+            disp(strcat('Extracted Mean Frequency from electrode:',EEG_chans(channel,:)))
+        end
         
-        % Spectral Entropy
-        MIFeaturesLabel(trial,channel,n) = -sum(normlizedMatrix.*log2(normlizedMatrix)); % calculate the spectral entropy
-        n = n + 1;
-        disp(strcat('Extracted Spectral Entropy from electrode:',EEG_chans(channel,:)))
+        if feature_setting.Obw
+            % Occupied bandwidth
+            % returns the 99% occupied bandwidth of the power spectral density (PSD) estimate, pxx.
+            % The frequencies, f, correspond to the estimates in pxx.
+            MIFeaturesLabel(trial,channel,n) = obw(normlizedMatrix,f);
+            n = n + 1;
+            disp(strcat('Extracted Occupied bandwidth from electrode:',EEG_chans(channel,:)))
+        end
         
-        
-        % Slope
-        transposeMat = (welch{channel}(:,trial)');          % transpose matrix
-        % create local function for computing the polyfit on the transposed matrix and the frequency vector
-        FitFH = @(k)polyfit(log(f(1,:)),log(transposeMat(k,:)),1);
-        % convert the cell that gets from the local func into matrix, perform the
-        % function on transposeMat, the slope is in each odd value in the matrix
-        % Apply function to each element of tansposeMat
-        pFitLiner = cell2mat(arrayfun(FitFH, 1:size(transposeMat,1), 'un',0));
-        MIFeaturesLabel(trial,channel,n)=pFitLiner(1:2 :length(pFitLiner));
-        n = n + 1;
-        disp(strcat('Extracted Slope from electrode:',EEG_chans(channel,:)))
-        
-        
-        % Intercept
-        % the slope is in each double value in the matrix
-        MIFeaturesLabel(trial,channel,n)=pFitLiner(2:2:length(pFitLiner));
-        n= n + 1;
-        disp(strcat('Extracted Intercept from electrode:',EEG_chans(channel,:)))
-        
-        
-        % Mean Frequency
-        % returns the mean frequency of a power spectral density (PSD) estimate, pxx.
-        % The frequencies, f, correspond to the estimates in pxx.
-        MIFeaturesLabel(trial,channel,n) = meanfreq(normlizedMatrix,f);
-        n = n + 1;
-        disp(strcat('Extracted Mean Frequency from electrode:',EEG_chans(channel,:)))
-        
-        
-        % Occupied bandwidth
-        % returns the 99% occupied bandwidth of the power spectral density (PSD) estimate, pxx.
-        % The frequencies, f, correspond to the estimates in pxx.
-        MIFeaturesLabel(trial,channel,n) = obw(normlizedMatrix,f);
-        n = n + 1;
-        disp(strcat('Extracted Occupied bandwidth from electrode:',EEG_chans(channel,:)))
-        
-        
-        % Power bandwidth
-        MIFeaturesLabel(trial,channel,n) = powerbw(normlizedMatrix,Fs);
-        n = n + 1;
-        disp(strcat('Extracted Power bandwidth from electrode:',EEG_chans(channel,:)))
-        
+        if feature_setting.Powerbw
+            % Power bandwidth
+            MIFeaturesLabel(trial,channel,n) = powerbw(normlizedMatrix,Fs);
+            n = n + 1;
+            disp(strcat('Extracted Power bandwidth from electrode:',EEG_chans(channel,:)))
+        end     
     end
 end
 
 % z-score all the features - make sure there are not outlier
-MIFeaturesLabel = zscore(MIFeaturesLabel);
+if params.z == 1
+    MIFeaturesLabel = zscore(MIFeaturesLabel);
+end
 
 % Reshape into 2-D matrix - with this data we label right or left hands 
 MIFeatures = reshape(MIFeaturesLabel,trials,[]);
@@ -282,11 +262,14 @@ LabelTrain(testIdx) = [];                   % delete the test trials from the la
 class = fscnca(FeaturesTrain,LabelTrain);   % feature selection
 % sorting the weights in desending order and keeping the indexs
 [wts,selected] = sort(class.FeatureWeights,'descend');
-disp(wts)
 % taking only the specified number of features with the largest weights
 SelectedIdx = selected(1:Features2Select);
 FeaturesTrainSelected = FeaturesTrain(:,SelectedIdx);       % updating the matrix feature
 FeaturesTest = FeaturesTest(:,SelectedIdx);                 % updating the matrix feature
+
+f_Visualize_FeatureSelect(class, features_headers, 13, n-1)
+% create mat
+%%
 % saving
 save(strcat(recordingFolder,'\FeaturesTrain.mat'),'FeaturesTrain');
 save(strcat(recordingFolder,'\FeaturesTrainSelected.mat'),'FeaturesTrainSelected');
@@ -294,32 +277,41 @@ save(strcat(recordingFolder,'\FeaturesTest.mat'),'FeaturesTest');
 save(strcat(recordingFolder,'\SelectedIdx.mat'),'SelectedIdx');
 save(strcat(recordingFolder,'\LabelTest.mat'),'LabelTest');
 save(strcat(recordingFolder,'\LabelTrain.mat'),'LabelTrain');
-
 disp('Successfuly extracted features!');
 
-%% Matrix visualization 
-figure;
-num_channels = 13;
-num_features_per_channel = 14;
-% weightMatrix = zeros(num_channels, num_features_per_channel);
-weightMatrix = reshape(class.FeatureWeights(4:end), num_features_per_channel, num_channels).';
-features_headers = {'15.5-18.5 band', '8-10.5 band', '10-15.5 band', '17.5-20.5 band', ...
-    '12.5-30 band', 'Root', 'Moment', 'Edge', ...
-    'Entropy', 'Slope', 'Intercept', 'Mean freq', 'Obw', 'Powerbw'};
-channel_names = {'C03','C04','C0Z','FC1',...
-    'FC2','FC5','F06','CP1', 'CP2',...
-    'CP5','CP6','O01','O02'};
-imagesc(weightMatrix);
-xticks([1:14])
-yticks([1:13])
-xticklabels(features_headers)
-xtickangle(70)
-yticklabels(channel_names)
-title('Feature matrix visualization')
-% Set up where it will show x, y, and value in status line.
-impixelinfo;
-% Get the current colormap
-cmap = colormap;
+%% Save table for original 3 Features
+% Save a table for the whole features
+Combined_features_mat = [LabelTrain' FeaturesTrainSelected; LabelTest' FeaturesTest];
+Combined_features_table = array2table(Combined_features_mat);
+Combined_features_table.Properties.VariableNames(1) = {'Class'};
+Combined_features_table.Class = categorical(Combined_features_table.Class,1:3,{'Idle' 'Left','Right'});
+writetable(Combined_features_table);
 
+%% Feature Table for two classes:
+% Save a table for the whole features
+testIdx = randperm(length(rightIdx),4);                       % picking test index randomly
+testIdx = [leftIdx(testIdx) rightIdx(testIdx)];    % taking the test index from each class
+DelIdx = [ testIdx idleIdx];
+% testIdx = [leftIdx(testIdx) idleIdx(testIdx)]; 
+% DelIdx = [ testIdx rightIdx];
+testIdx = sort(testIdx); 
+FeaturesTest_2class = MIFeatures(testIdx,:,:);     % Redundant third dimension? taking the test trials features from each class
+LabelTest_2class = targetLabels(testIdx);
+% split train data
+FeaturesTrain_2class = MIFeatures;
+
+FeaturesTrain_2class (DelIdx,:,:) = [];          % delete the test trials from the features matrix, and keep only the train trials
+LabelTrain_2class = targetLabels;
+LabelTrain_2class(DelIdx) = [];
+class_2 = fscnca(FeaturesTrain_2class,LabelTrain_2class,'Solver','sgd','Verbose',1);
+[~,selected] = sort(class_2.FeatureWeights,'descend');
+% taking only the specified number of features with the largest weights
+SelectedIdx = selected(1:Features2Select);
+FeaturesTrainSelected_2class = FeaturesTrain_2class(:,SelectedIdx);       % updating the matrix feature
+FeaturesTest_2class = FeaturesTest_2class(:,SelectedIdx);
+Combined_features_mat_2class = [LabelTrain_2class' FeaturesTrainSelected_2class; LabelTest_2class' FeaturesTest_2class];
+Combined_features_table_2class = array2table(Combined_features_mat_2class);
+Combined_features_table_2class.Properties.VariableNames(1) = {'Class'};
+Combined_features_table_2class.Class = categorical(Combined_features_table_2class.Class,1:3,{'Idle' 'Left','Right'});
+writetable(Combined_features_table_2class);
 end
-

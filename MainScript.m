@@ -1,38 +1,37 @@
 %% MI Offline Main Script
-% This script runs all the steps in order. Training -- Pre-processing --
-% Data segmentation -- Feature extraction -- Model training.
-% Two important points:
-% 1. Remember the ID number (without zero in the beginning) for each different person
-% 2. Remember the Lab Recorder filename and folder.
-
-% Prequisites: Refer to the installation manual for required softare tools.
-
 % This code is part of the BCI-4-ALS Course written by Asaf Harel
 % (harelasa@post.bgu.ac.il) in 2021. You are free to use, change, adapt and
 % so on - but please cite properly if published.
-
-clc; clear; close all;
-
-%% Run stimulation and record EEG data
-[recordingFolder] = MI1_offline_training();
-disp('Finished stimulation and EEG recording. Stop the LabRecorder and press any key to continue...');
-pause;
-
-%% Run pre-processing pipeline on recorded data
-MI2_preprocess(recordingFolder);
+%% Load parameters from config
+config_param
+%% Run MI1
+% [recordingFolder, trainingVec] = MI1_offline_training(lslPath, rootRecordingPath, MI1params); % Removed classes and trial length
+% disp('Finished stimulation and EEG recording. Stop the LabRecorder and press any key to continue...');
+% pause;
+%% Run MI2:
+% for manually running - load to the workspace the relevant recordingFolder
+% and its training vector - load(recordingFolder,'\trainingVec'))
+% Custom recording folder definition - recordingFolder = 'C:\Recordings\New_headset_raz\nadav2_with_touch';
+[EEG_Arr] = MI2_preprocess(recordingFolder, eeglabPath, unused_channels, MI2params);
+% Visualize base characteritics
+f_Visualize_EEG(EEG_Arr, 5, 0)
+% EEGLAB Interactive plots
+f_Visualize_EEG_interactive(EEG_Arr, 5)
+% EEGLAB Headset plots
+f_Visualize_EEG_headset(EEG_Arr,5)
 disp('Finished pre-processing pipeline. Press any key to continue...');
-pause;
-%% Segment data by trials
-MI3_segmentation(recordingFolder);
+%% Run MI3 (create MIData)
+[MIData] = MI3_segmentation(recordingFolder, fs, trialLength, startMarker, size(EEG_chans,1));
 disp('Finished segmenting the data. Press any key to continue...');
 pause;
-
-%% Extract features and labels
-MI4_featureExtraction(recordingFolder);
+%% Run MI4 (Extract features and labels)
+MI4_featureExtraction(recordingFolder, MIData, EEG_chans, trainingVec, bands, times, feature_headers, MI4params, feature_setting);
 disp('Finished extracting features and labels. Press any key to continue...');
 pause;
-
-%% Train a model using features and labels
-testresult = MI5_modelTraining(recordingFolder);
-disp('Finished training the model. The offline process is done!');
-
+%% Load features
+two_class_table = readtable('Combined_features_table_2class.txt');
+three_class_table = readtable('Combined_features_table.txt');
+disp('Loaded tables');
+% %% Train a model using features and labels
+% testresult = MI5_modelTraining(recordingFolder);
+% disp('Finished training the model. The offline process is done!');

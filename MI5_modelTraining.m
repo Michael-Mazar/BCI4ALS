@@ -10,7 +10,7 @@ function [test_results] = MI5_modelTraining(recordingFolder)
 
 %% Read the features & labels 
 
-FeaturesTrain = cell2mat(struct2cell(load(strcat(recordingFolder,'\FeaturesSelected.mat'))));   % features for train set
+FeaturesTrain = cell2mat(struct2cell(load(strcat(recordingFolder,'\FeaturesTrainSelected.mat'))));   % features for train set
 LabelTrain = cell2mat(struct2cell(load(strcat(recordingFolder,'\LabelTrain'))));                % label vector for train set
 
 % label vector
@@ -28,7 +28,34 @@ W = LDA(FeaturesTrain,LabelTrain);                                              
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%% Add your own classifier %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+% lin_svm = fitcsvm(FeaturesTrain, LabelTrain);
+% y_svm = zeros(size(FeaturesTest));
+% % 
+% 
+% 
+% cd(config.svm_toolbox);
+% % s 0: C-SVM
+% % t 0: linear; 1: polynomial; 2: rbf; 3: sigmoid
+% cmd = ['-q -s 0 -t 2 -g ', num2str(2^log2g), '-c ', num2str(2^log2c),'-b 0'];
+% model = svmtrain(TrainClass, TrainData, cmd);
+% [TestPredict, accuracy,~] = svmpredict(TestClass,TestData,model,'-b 0');
+% 
+% TestAcc = accuracy(1,1);
+% %TrainPredict = classify(TrainData,TrainData,TrainClass);
+% %TestPredict = classify(TestData,TrainData,TrainClass);
+% [TrainPredict, accuracy,~] = svmpredict(TrainClass,TrainData,model,'-b 0');
+% TrainAcc = accuracy(1,1);
+% 
+% 
+% for x=1:length(cnt)
+%     y_svm(x) = test_svm(single(cnt(x,:)),S,T,lin_svm);
+% end
+% 
+% 
+% 
+% % loss = eval_mcr(y_svm(indices),true_y(indices));
+% k = compute_cohens_k(true_y(indices), y_svm(indices));
+% fprintf('The linear svm mis-classification rate on the test set is %.2f percent & kappa = %.3f\n',100*loss, k);
 %% Test data
 % test prediction from linear classifier
 test_results = (testPrediction'-LabelTest);                                         % prediction - true labels = accuracy
@@ -39,5 +66,3 @@ save(strcat(recordingFolder,'\TestResults.mat'),'test_results');                
 save(strcat(recordingFolder,'\WeightVector.mat'),'W');                              % save the model (W)
 
 end
-
-
