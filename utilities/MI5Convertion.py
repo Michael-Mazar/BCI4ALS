@@ -5,9 +5,12 @@
 import scipy.io
 import numpy as np
 import os
+import lazypredict
+from lazypredict.Supervised import LazyClassifier
+from sklearn.model_selection import train_test_split
 
 
-def get_data(recording_folder):  # call this function after running MI4
+def get_split_by_matlab(recording_folder):  # call this function after running MI4
     x_train_file = r'FeaturesTrainSelected'
     y_train_file = r'LabelTrain'
     x_test_file = r'LabelTest'
@@ -19,10 +22,21 @@ def get_data(recording_folder):  # call this function after running MI4
     return x_train, y_train, x_test, y_test  # returned as numpy arrays
 
 
+def get_all_data(recording_folder):
+    X_file = r'AllDataInFeatures'
+    y_file = r'trainingVec'
+    X = scipy.io.loadmat(os.path.join(recording_folder, X_file))[X_file]
+    y = scipy.io.loadmat(os.path.join(recording_folder, y_file))[y_file]
+    return X, y  # returned as numpy arrays
+
+
 if __name__ == '__main__':
-    """
-    raz check:
-    recording_folder = r'C:\Users\Raz\Study\Cognition_Science\BCI4ALS\Recordings\261221\Sub11'
-    x_train, y_train, x_test, y_test = get_data(recording_folder)
-    """
+    recording_folder = r'C:\Users\Raz\Study\Cognition_Science\BCI4ALS\Recordings\test\2'
+    #X_train, y_train, X_test, y_test = get_split_by_matlab(recording_folder)
+    X, y = get_all_data(recording_folder) # make sure dim are right
+    X_train, X_test, y_train, y_test = train_test_split(X, y.T, test_size=.2, random_state=42)
+    # fit all models
+    clf = LazyClassifier(predictions=True)
+    models, predictions = clf.fit(X_train, X_test, y_train, y_test)
+    print(models.iloc[:,:4])
 
