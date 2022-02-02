@@ -7,10 +7,10 @@ trialLength = 3;  % remember to change times for bandpower!
 waitList = [3, 1, 1, 1]; % init, ready, cue, next
 startMarker = 1111;
 markersList = [000, 99, startMarker, 9, 1001]; % startRec, endRec, startTrial, endTrial, baseline 
-lslPath = 'C:\Users\mazar\Documents\MATLAB\Michael Mazar\dependencies\liblsl-Matlab';
-eeglabPath = 'C:\Users\mazar\Documents\MATLAB\Michael Mazar\dependencies\eeglab2021.0';
-rootRecordingPath = 'C:\Recordings';
-recordingFolder = 'C:\Recordings\New_headset_raz\raz_merged';
+lslPath = 'C:\Toolboxes\labStreamingLayer';
+eeglabPath = 'C:\Toolboxes\eeglab2021.1';
+rootRecordingPath = 'D:\BCI4ALS\data\';
+recordingFolder = 'D:\BCI4ALS\data\'; % TODO: change back to'C:\Recordings\New_headset_raz\raz_merged';
 classes{1} = imread('square.jpeg','jpeg'); 
 classes{2} = imread('arrow_left.jpeg','jpeg');
 classes{3} = imread('arrow_right.jpeg','jpeg');
@@ -37,7 +37,7 @@ unused_channels = {'T8','PO3','PO4'}; % For 13 channels headset
 notchList = [50];  % check if also need 25!
 highFilter = 30; % Was 50
 lowFilter = 4; % Was 0.5
-ICA = 0.8;
+ICA_threshold = 0.8;
 fs = 125; % openBCI sample rate
 %% Feature extraction parameters
 to_implement_zscore = 1; % 1 is true, otherwise false
@@ -89,7 +89,8 @@ MI1params = struct('numTrials', numTrials, 'numClasses', numClasses, 'count', ..
     waitList, 'markers', markersList);
 % Parameters for M2
 MI2params = struct('highLim', highFilter, 'lowLim', lowFilter, 'notch', ...
-    notchList, 'ICA', ICA, 'channelsNum', size(EEG_chans,1));
+    notchList, 'ICA_threshold', ICA_threshold, 'channelsNum', size(EEG_chans,1));
+
 % Parameters for M4
 MI4params = struct('select', how_many_features_to_select, 'test', ...
     how_many_test_for_class, 'FS', fs, 'vizTrial', vizTrial, 'z',...

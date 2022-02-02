@@ -86,11 +86,9 @@ EEG.data = EEG_afterLap_C4;
 EEG_AfterLap = EEG;
 
 % (6) ICA Processing
-EEG_AfterICA = [];
-% EEG_AfterICA = clean_ica_components(EEG, 0.7);
-% EEG = clean_ica_components(EEG, params.ICA);
+EEG_AfterICA = clean_ica_components(EEG, params.ICA_threshold);
 EEG_Arr = [originalEEG, EEG_afterHigh, EEG_afterLow, EEG_afterBandPass, EEG_AfterLap, EEG_AfterICA];
-%%
+
 % Save the data into .mat variables on the computer
 EEG_data = EEG.data;            % Pre-processed EEG data
 EEG_event = EEG.event;          % Saved markers for sorting the data
