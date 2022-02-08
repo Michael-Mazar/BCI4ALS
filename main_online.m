@@ -1,4 +1,3 @@
-function [recordingFolder, trainingVec] = MI1_offline_training(liblsl_path, root_recording_folder, params)
 %% MOTOR IMAGERY Training Scaffolding 
 % This code creates a training paradigm with (#) classes on screen for
 % (#) numTrials. Before each trial, one of the targets is cued (and remains
@@ -8,51 +7,45 @@ function [recordingFolder, trainingVec] = MI1_offline_training(liblsl_path, root
 % (harelasa@post.bgu.ac.il) in 2021. You are free to use, change, adapt and
 % so on - but please cite properly if published.
 %% Parameters
-addpath(string(liblsl_path));     % lab streaming layer library
-addpath(string(liblsl_path) + '\bin'); % lab streaming layer bin
-numTrials = params.numTrials;           % 5 number of trials - set number of training trials per class (the more classes, the more trials per class)
-numClasses = params.numClasses;         % set number of possible classes
-trialLength = params.trialLength;                        % each trial length in seconds 
+config_params
+addpath(string(lslPath));     % lab streaming layer library
+addpath(string(lslPath) + '\bin'); % lab streaming layer bin
+numTrials = MI1params.numTrials;           % 5 number of trials - set number of training trials per class (the more classes, the more trials per class)
+numClasses = MI1params.numClasses;         % set number of possible classes
+trialLength = MI1params.trialLength;                        % each trial length in seconds 
 % wait: init, ready, cue, next
-InitWait = params.waits(1);             % before trials prep time
-readyLength = params.waits(2);                        % time "ready" on screen
-cueLength = params.waits(3);                          % time for each cue
-nextLength = params.waits(4);                         % time "next" on screen
-% markers: startRec, endRec, startTrial, endTrial, baseline, idle, left, right 
-startRecordings = params.markers(1); 
-endRecrding = params.markers(2);
-startTrial = params.markers(3);
-endTrial = params.markers(4);
-Baseline = params.markers(5);
+InitWait = MI1params.waits(1);             % before trials prep time
+readyLength = MI1params.waits(2);                        % time "ready" on screen
+cueLength = MI1params.waits(3);                          % time for each cue
+nextLength = MI1params.waits(4);                         % time "next" on screen
 % Training Vector
 trainingVec = prepareTraining(numTrials,numClasses);    % vector with the conditions for each trial
-%% Recording location
-% Define recording folder location and create the folder:
-subID = input('Please enter subject ID/Name: ');    % prompt to enter subject ID or name
-subFolder = strcat(root_recording_folder, '\', num2str(subID));
-if not(isfolder(subFolder))
-    mkdir(subFolder);
-end
-% Get current date
-dt = datetime('now');
-dt.Format = 'dd-MMM-yyyy';
-todayFolder = strcat(subFolder, '\', string(dt));
-if not(isfolder(todayFolder))
-    mkdir(todayFolder);
-end
-recordingFolder = strcat(todayFolder, '\', string(params.count), '\');
-if not(isfolder(recordingFolder))
-    mkdir(recordingFolder);
-end
+% MI4 results
+load(strcat(recordingFolder,'\W.mat')); %load W for csp
+load(strcat(recordingFolder,'\SelectedIdx.mat')); %load indexes of selected features
+% online params
+buffer = [];
+iteration = 0;
+prediction = [];
+decCount = 0;                                       
 %% open stream
 disp('Loading the Lab Streaming Layer library...');
 lib = lsl_loadlib();                    % load the LSL library
 disp('Opening Marker Stream...');
-% Define stream parameters
 info = lsl_streaminfo(lib,'MarkerStream','Markers',1,0,'cf_string','myuniquesourceid23443');
 outletStream = lsl_outlet(info);        % create an outlet stream using the parameters above
-disp('Open Lab Recorder & check for MarkerStream and EEG stream, start recording, return here and hit any key to continue.');
-pause;                                  % wait for experimenter to press a key
+disp('Resolving an EEG Stream...');
+result = {};
+lslTimer = tic;
+while isempty(result) && toc(lslTimer) < params.resolveTime % FIXME add some stopping condition
+    result = lsl_resolve_byprop(lib,'type','EEG'); 
+end
+disp('Success resolving!');
+EEG_Inlet = lsl_inlet(result{1});
+
+% asaf also read first data before: (why needed??)
+pause(0.2);                          % give the system some time to buffer data
+cur_data = EEG_Inlet.pull_chunk();   % get a chunk from the EEG LSL stream to get the buffer going
 %% Screen Setup 
 monitorPos = get(0,'MonitorPositions'); % monitor position and number of monitors
 monitorN = size(monitorPos, 1);
@@ -73,7 +66,6 @@ hAx.XLim = [0, 1];                          % lock axes limits
 hAx.YLim = [0, 1];
 hold on
 %% Start Training
-outletStream.push_sample(startRecordings);      % start of recordings. Later, reject all EEG data prior to this marker
 totalTrials = length(trainingVec);
 text(0.5,0.5 ,...                               % important for people to prepare
     ['System is calibrating.' newline 'The training session will begin shortly.'], ...
@@ -81,32 +73,57 @@ text(0.5,0.5 ,...                               % important for people to prepar
 pause(InitWait)
 cla
 for trial = 1:totalTrials
-    outletStream.push_sample(startTrial);       % trial trigger & counter
-%     startTrial = startTrial + trial;    
-    currentClass = trainingVec(trial);          % What class is it?
-    
+    currentClass = trainingVec(trial);          % What class is it?    
     % Cue before ready
     image(flip(trainingImage{currentClass}, 1), 'XData', [0.25, 0.75],...
         'YData', [0.25, 0.75 * ...
         size(trainingImage{currentClass},1)./ size(trainingImage{currentClass},2)])
     pause(cueLength);                           % Pause for cue length
     cla                                         % Clear axis
-    
     % Ready
     text(0.5,0.5 , 'Ready',...
         'HorizontalAlignment', 'Center', 'Color', 'white', 'FontSize', 40);
-    outletStream.push_sample(Baseline);         % Baseline trigger
     pause(readyLength);                         % Pause for ready length
     cla                                         % Clear axis
-    
     % Show image of the corresponding label of the trial
     image(flip(trainingImage{currentClass}, 1), 'XData', [0.25, 0.75],...
         'YData', [0.25, 0.75 * ...
         size(trainingImage{currentClass},1)./ size(trainingImage{currentClass},2)])    
-    outletStream.push_sample(currentClass);     % class label
-    pause(trialLength)                          % Pause for trial length
-    cla                                         % Clear axis
-
+    %% here add new things
+    buffer = [];
+    start = tic;
+    while toc(start) < 200 % how much returns needed for the same cue??
+        itertation = iteration + 1;
+        cur_data = EEG_Inlet.pull_chunk();
+        pause(0.1);
+        if ~isempty(cur_data)
+            buffer = [buffer, cur_data];
+        else
+            disp(strcat('no data to pull in trial', num2str(trial), 'after', num2str(toc(start)), 'sec'), 'iteration', num2str(iteration));
+        end
+        if size(buffer,2) <= trialLength*Fs
+            disp('not enough data :(');
+        else
+            decCount = decCount + 1;
+            block = [buffer];
+            MI2params.offline = 0;
+            [EEG_arr] = preprocess(block, recordingFolder, eeglabPath, unused_channels, MI2params);
+            EEG_data = EEG_arr(6);
+            MIData = [];
+            for channel=1:numChans
+                MIData(1, channel, :) = EEG_data(channel, :);
+            end
+            [MIFeatures] = feature_engineering(recordingFolder, MIData, bands, times, W, MI4params, feature_setting);
+            FeaturesSelected = MIFeatures(:,SelectedIdx);
+            save(strcat(recordingFolder,'\', 'features_dec_', num2str(decCount), '.mat'),'EEG_data');
+            % run predict
+            % update GUI - feedaback
+            % retratining?
+            % save prediction? features? new model?
+            buffer = [];
+        end
+    end
+    
     % Display "Next" trial text
     text(0.5,0.5 , 'Next',...
         'HorizontalAlignment', 'Center', 'Color', 'white', 'FontSize', 40);
@@ -117,10 +134,8 @@ for trial = 1:totalTrials
     pause(nextLength);                          % Wait for next trial
     cla                                         % Clear axis
     
-    outletStream.push_sample(endTrial);         % end of trial trigger
 end
 
 %% End of experiment
+disp('Finished');
 save(strcat(recordingFolder,'trainingVec.mat'),'trainingVec');
-outletStream.push_sample(endRecrding);          % end of experiment trigger
-disp('!!!!!!! Stop the LabRecorder recording!');
