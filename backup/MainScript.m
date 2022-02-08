@@ -13,6 +13,7 @@ config_param
 % and its training vector - load(recordingFolder,'\trainingVec'))
 % Custom recording folder definition - recordingFolder = 'C:\Recordings\New_headset_raz\nadav2_with_touch';
 [EEG_Arr] = MI2_preprocess(recordingFolder, eeglabPath, unused_channels, MI2params);
+close all;
 % Visualize base characteritics
 f_Visualize_EEG(EEG_Arr, 5, 0)
 % EEGLAB Interactive plots
@@ -20,6 +21,7 @@ f_Visualize_EEG_interactive(EEG_Arr, 5)
 % EEGLAB Headset plots
 f_Visualize_EEG_headset(EEG_Arr,5)
 disp('Finished pre-processing pipeline. Press any key to continue...');
+pause;
 %% Run MI3 (create MIData)
 [MIData] = MI3_segmentation(recordingFolder, fs, trialLength, startMarker, size(EEG_chans,1));
 disp('Finished segmenting the data. Press any key to continue...');
