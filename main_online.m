@@ -73,6 +73,7 @@ text(0.5,0.5 ,...                               % important for people to prepar
 pause(InitWait)
 cla
 for trial = 1:totalTrials
+    %{
     currentClass = trainingVec(trial);          % What class is it?    
     % Cue before ready
     image(flip(trainingImage{currentClass}, 1), 'XData', [0.25, 0.75],...
@@ -89,10 +90,11 @@ for trial = 1:totalTrials
     image(flip(trainingImage{currentClass}, 1), 'XData', [0.25, 0.75],...
         'YData', [0.25, 0.75 * ...
         size(trainingImage{currentClass},1)./ size(trainingImage{currentClass},2)])    
+    %}
     %% here add new things
     buffer = [];
     start = tic;
-    while toc(start) < 200 % how much returns needed for the same cue??
+    while toc(start) < 240 % how much returns needed for the same cue??
         itertation = iteration + 1;
         cur_data = EEG_Inlet.pull_chunk();
         pause(0.1);
@@ -116,8 +118,13 @@ for trial = 1:totalTrials
             [MIFeatures] = feature_engineering(recordingFolder, MIData, bands, times, W, MI4params, feature_setting);
             FeaturesSelected = MIFeatures(:,SelectedIdx);
             save(strcat(recordingFolder,'\', 'features_dec_', num2str(decCount), '.mat'),'EEG_data');
-            % run predict
-            % update GUI - feedaback
+            % send TCP to GUI - features are saved (the GUI run the
+            % predict and present the feedback)
+            
+            
+            % get TCP from GUI - ready for next trial
+            
+
             % retratining?
             % save prediction? features? new model?
             buffer = [];
