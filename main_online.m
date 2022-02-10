@@ -10,17 +10,19 @@
 config_params
 addpath(string(lslPath));     % lab streaming layer library
 addpath(string(lslPath) + '\bin'); % lab streaming layer bin
-numTrials = MI1params.numTrials;           % 5 number of trials - set number of training trials per class (the more classes, the more trials per class)
 numClasses = MI1params.numClasses;         % set number of possible classes
 trialLength = MI1params.trialLength;                        % each trial length in seconds 
-% Training Vector
-trainingVec = prepareTraining(numTrials,numClasses);    % vector with the conditions for each trial
 % MI4 results
 load(strcat(recordingFolder,'\W.mat')); %load W for csp
 load(strcat(recordingFolder,'\SelectedIdx.mat')); %load indexes of selected features
 % online params
+online_trails = 6;
+feedback_returns = 5;
 buffer = [];
 ALL_FEATURES = [];
+% Training Vector
+trainingVec = prepareTraining(online_trails,numClasses);    % vector with the conditions for each trial
+
 %% open stream
 disp('Loading the Lab Streaming Layer library...');
 lib = lsl_loadlib();                    % load the LSL library
@@ -55,7 +57,7 @@ for trial = 1:totalTrials
     %currentClass = trainingVec(trial); - no use for now, maybe later in retraining    
     buffer = [];
     start = tic;
-    while toc(start) < 100 % how much returns needed for the same cue??
+    while toc(start) < feedback_returns*trialLength % how much returns needed for the same cue??
         cur_data = EEG_Inlet.pull_chunk();
         pause(0.1);
         if ~isempty(cur_data)
@@ -81,9 +83,24 @@ for trial = 1:totalTrials
         save(strcat(recordingFolder,'\', 'online_trial_features.mat'),'EEG_data');
         
         % notify GUI that features are saved to disk 
-        write(t, "next"); 
-        break
+        write(t, "next");
+        
+        % Wait for signal FROM GUI to continue to the next feedback
+        wait_for_message = 1;
+        while (wait_for_message)
+            msg_length = t.NumBytesAvailable;
+            if msg_length > 0
+                bytes = read(t);
+                %[bytes, count] = read(t, [1, t.BytesAvailable]);
+                disp('Got it!!');
+                wait_for_message = 0;
+                % Check if messsage == "feedback"
+                disp(char(bytes))                  
+            end
+        end
+        buffer = [];
     end
+    
     % Wait for signal FROM GUI to continue to the next trial
     wait_for_message = 1;
     while (wait_for_message)
@@ -93,14 +110,14 @@ for trial = 1:totalTrials
             %[bytes, count] = read(t, [1, t.BytesAvailable]);
             disp('Got it!!');
             wait_for_message = 0;
-            % Check if messsage == "end"/"stop"
+            % Check if messsage == "trial"
             disp(char(bytes))                  
         end
     end
-    %consider if retraining should be here - after X trials (when
-    %trial&x==0)
+
+    %TODO: consider if retraining should be here (when trial&x==0)
 end
-% retraining
+% TODO: retraining
 save(strcat(recordingFolder, '\', 'online_trainingVec.mat'),'trainingVec');
 save(strcat(recordingFolder,'\', 'online_all_features.mat'),'ALL_FEATURES');
 write(t, "train"); % signel for retraining the model (all features saved)
