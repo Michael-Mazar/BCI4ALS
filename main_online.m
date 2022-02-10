@@ -46,55 +46,26 @@ EEG_Inlet = lsl_inlet(result{1});
 % asaf also read first data before: (why needed??)
 pause(0.2);                          % give the system some time to buffer data
 cur_data = EEG_Inlet.pull_chunk();   % get a chunk from the EEG LSL stream to get the buffer going
-%% Screen Setup 
-monitorPos = get(0,'MonitorPositions'); % monitor position and number of monitors
-monitorN = size(monitorPos, 1);
-choosenMonitor = 1;                     % which monitor to use TODO: make a parameter                                 
-if choosenMonitor < monitorN            % if no 2nd monitor found, use the main monitor
-    choosenMonitor = 1;
-    disp('Another monitored is not detected, using main monitor.')
-end
-figurePos = monitorPos(choosenMonitor, :);  % get choosen monitor position
-figure('outerPosition',figurePos);          % open full screen monitor
-MainFig = gcf;                              % get the figure and axes handles
-hAx  = gca;
-set(hAx,'Unit','normalized','Position',[0 0 1 1]); % set the axes to full screen
-set(MainFig,'menubar','none');              % hide the toolbar   
-set(MainFig,'NumberTitle','off');           % hide the title
-set(hAx,'color', 'black');                  % set background color
-hAx.XLim = [0, 1];                          % lock axes limits
-hAx.YLim = [0, 1];
-hold on
+
+%% Start connection
+HOST = 'localhost';
+PORT = 50007;
+disp('Connecting to python script!');
+t = tcpclient(HOST, PORT);
+disp('Connected to Python GUI');
+
 %% Start Training
 totalTrials = length(trainingVec);
-text(0.5,0.5 ,...                               % important for people to prepare
-    ['System is calibrating.' newline 'The training session will begin shortly.'], ...
-    'HorizontalAlignment', 'Center', 'Color', 'white', 'FontSize', 40);
-pause(InitWait)
-cla
+
+% TODO: consider sending the cue vector to the GUI
+
 for trial = 1:totalTrials
-    %{
     currentClass = trainingVec(trial);          % What class is it?    
-    % Cue before ready
-    image(flip(trainingImage{currentClass}, 1), 'XData', [0.25, 0.75],...
-        'YData', [0.25, 0.75 * ...
-        size(trainingImage{currentClass},1)./ size(trainingImage{currentClass},2)])
-    pause(cueLength);                           % Pause for cue length
-    cla                                         % Clear axis
-    % Ready
-    text(0.5,0.5 , 'Ready',...
-        'HorizontalAlignment', 'Center', 'Color', 'white', 'FontSize', 40);
-    pause(readyLength);                         % Pause for ready length
-    cla                                         % Clear axis
-    % Show image of the corresponding label of the trial
-    image(flip(trainingImage{currentClass}, 1), 'XData', [0.25, 0.75],...
-        'YData', [0.25, 0.75 * ...
-        size(trainingImage{currentClass},1)./ size(trainingImage{currentClass},2)])    
-    %}
+    
     %% here add new things
     buffer = [];
     start = tic;
-    while toc(start) < 240 % how much returns needed for the same cue??
+    while toc(start) < 200 % how much returns needed for the same cue??
         itertation = iteration + 1;
         cur_data = EEG_Inlet.pull_chunk();
         pause(0.1);
@@ -118,19 +89,44 @@ for trial = 1:totalTrials
             [MIFeatures] = feature_engineering(recordingFolder, MIData, bands, times, W, MI4params, feature_setting);
             FeaturesSelected = MIFeatures(:,SelectedIdx);
             save(strcat(recordingFolder,'\', 'features_dec_', num2str(decCount), '.mat'),'EEG_data');
-            % send TCP to GUI - features are saved (the GUI run the
-            % predict and present the feedback)
             
-            
-            % get TCP from GUI - ready for next trial
-            
+            % notify GUI that the features for the next trial are saved to
+            % disk 
+            write(t, "next"); 
 
+            % Wait for signal FROM GUI to continue to the next trial
+            wait_for_message = 1;
+
+            while (wait_for_message)
+                msg_length = t.NumBytesAvailable;
+                if msg_length > 0
+                    bytes = read(t);
+                    %[bytes, count] = read(t, [1, t.BytesAvailable]);
+                    disp('Got it!!');
+                    wait_for_message = 0;
+                    % Check if messsage == "end"/"stop"
+                    disp(char(bytes))
+    %                         if (count == 3 && bytes(1) == 'e' && bytes(2) == 'n' && bytes(3) == 'd') || (count == 7 && bytes(1) == 'n' && bytes(2) == 'e' && bytes(3) == 'x' && bytes(4) == 't' && bytes(5) == 'e' && bytes(6) == 'n' && bytes(7) == 'd')
+    %                             disp('Connection closed, done!!');
+    %                             end_train = 1;
+    %                         end                        
+                end
+            end
+            
+    
+end
+
+            % run predict
+            % update GUI - feedaback
             % retratining?
             % save prediction? features? new model?
             buffer = [];
         end
     end
     
+    % TODO: send signal for retraining the model (after all trials in
+    % session are complete)
+
     % Display "Next" trial text
     text(0.5,0.5 , 'Next',...
         'HorizontalAlignment', 'Center', 'Color', 'white', 'FontSize', 40);
