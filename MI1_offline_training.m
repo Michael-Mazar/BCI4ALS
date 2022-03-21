@@ -37,12 +37,12 @@ end
 % Get current date
 dt = datetime('now');
 dt.Format = 'dd-MMM-yyyy-HH-mm';
-todayFolder = strcat(subFolder, '\', string(dt));
+todayFolder = strcat(subFolder, '\', string(dt), '\');
 if not(isfolder(todayFolder))
     mkdir(todayFolder);
 end
 recordingFolder = todayFolder;
-% recordingFolder = strcat(todayFolder, '\', string(params.count), '\');
+% recordingFolder = strcat(todayFolder, string(params.count), '\');
 % if not(isfolder(recordingFolder))
 %     mkdir(recordingFolder);
 % end
