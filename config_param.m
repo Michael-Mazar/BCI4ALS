@@ -1,7 +1,6 @@
 %% Recording parameters
-subject_experiment_number_today = 1;
 numClasses = 3;
-numTrials = 20;
+numTrials = 4;
 trialLength = 3;  % remember to change times for bandpower!
 waitList = [3, 1, 1, 1]; % init, ready, cue, next
 startMarker = 1111;
