@@ -131,7 +131,7 @@ SelectedIdx = selected(1:Features2Select);
 FeaturesTrainSelected = FeaturesTrain(:,SelectedIdx);       % updating the matrix feature
 FeaturesTest = FeaturesTest(:,SelectedIdx);                 % updating the matrix feature
 
-f_Visualize_FeatureSelect(class, features_headers, 13, n-1)
+f_Visualize_FeatureSelect(class, features_headers, numChans, params.n_features);
 % create mat
 %%
 % saving

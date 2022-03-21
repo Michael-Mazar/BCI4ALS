@@ -2,6 +2,8 @@
 % This code is part of the BCI-4-ALS Course written by Asaf Harel
 % (harelasa@post.bgu.ac.il) in 2021. You are free to use, change, adapt and
 % so on - but please cite properly if published.
+%% Refresh
+clc; clear; close all;
 %% Load parameters from config
 config_param
 %% Run MI1
@@ -12,6 +14,8 @@ pause;
 % for manually running - load to the workspace the relevant recordingFolder
 % and its training vector - load(recordingFolder,'\trainingVec'))
 % Custom recording folder definition - recordingFolder = 'C:\Recordings\New_headset_raz\nadav2_with_touch';
+addpath(string(eeglabPath));     % lab streaming layer library
+eeglab;
 try 
     recordingFile = strcat(recordingFolder,'\EEG.XDF');
     EEG = pop_loadxdf(recordingFile, 'streamtype', 'EEG', 'exclude_markerstreams', {});
@@ -25,9 +29,9 @@ close all;
 % Visualize base characteritics
 f_Visualize_EEG(EEG_Arr, 5, 0)
 % EEGLAB Interactive plots
-f_Visualize_EEG_interactive(EEG_Arr, 5)
+%f_Visualize_EEG_interactive(EEG_Arr, 5)
 % EEGLAB Headset plots
-f_Visualize_EEG_headset(EEG_Arr,5)
+%f_Visualize_EEG_headset(EEG_Arr,5)
 disp('Finished pre-processing pipeline. Press any key to continue...');
 pause;
 %% Run MI3 (create MIData)

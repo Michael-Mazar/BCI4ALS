@@ -1,5 +1,4 @@
 %% Recording parameters
-clc; clear; close all;
 subject_experiment_number_today = 1;
 numClasses = 3;
 numTrials = 20;
@@ -10,10 +9,10 @@ markersList = [000, 99, startMarker, 9, 1001]; % startRec, endRec, startTrial, e
 lslPath = 'C:\Users\Raz\BCI4ALS\liblsl-Matlab';
 eeglabPath = 'C:\Users\Raz\BCI4ALS\eeglab2021.1';
 rootRecordingPath = 'C:\Users\Raz\BCI4ALS\Recordings';
-recordingFolder = 'C:\Users\Raz\BCI4ALS\Recordings\21_03_22'; % TODO: change back to'C:\Recordings\New_headset_raz\raz_merged';
 trainingImages{1} = imread('square.jpeg','jpeg'); 
 trainingImages{2} = imread('arrow_left.jpeg','jpeg');
 trainingImages{3} = imread('arrow_right.jpeg','jpeg');
+%recordingFolder = 'C:\Users\Raz\BCI4ALS\Recordings\21_03_22'; % TODO: change back to'C:\Recordings\New_headset_raz\raz_merged';
 %loaded_temp = load(strcat(recordingFolder,'\trainingVec.mat'));               % load the training vector (which target at which trial)
 %trainingVec = loaded_temp.trainingVec;
 %% Preprocessing parameters
@@ -28,15 +27,15 @@ EEG_chans(8,:) = 'CP1';
 EEG_chans(9,:) = 'CP2';
 EEG_chans(10,:) = 'CP5';
 EEG_chans(11,:) = 'CP6';
-EEG_chans(12,:) = 'O01'; % Might need to remove this
-EEG_chans(13,:) = 'O02'; % Might need to remove this
-unused_channels = {'T8','PO3','PO4'}; % For 13 channels headset
-% unused_channels = {'T8','PO3','PO4','O2','O1'}; % For 11 channels headset
+%EEG_chans(12,:) = 'O01';
+%EEG_chans(13,:) = 'O02';
+%unused_channels = {'T8','PO3','PO4'}; % For 13 channels headset
+unused_channels = {'T8','PO3','PO4','O2','O1'}; % For 11 channels headset
 % class 1 is idle, 2 is left and 3 is right - for any change still need to
 % change manually MI4 (lines 70-71 and 229-231
 notchList = [50];  % check if also need 25!
-highFilter = 30; % Was 50
-lowFilter = 4; % Was 0.5
+highFilter = 40; % Was 50
+lowFilter = 0.5; % Was 0.5
 ICA_threshold = 0.8;
 fs = 125; % openBCI sample rate
 %% Feature extraction parameters
@@ -81,15 +80,14 @@ if feature_setting.Bands
 end
 fn = fieldnames(feature_setting);
 for k=1:numel(fn)
-    if(feature_setting.(fn{k}))
+    if(feature_setting.(fn{k}) && ~strcmp(fn{k}, 'Bands'))
         feature_headers{end+1} = fn{k};
     end
 end
 n_features = size(feature_headers, 2);
 %%
 % Parameters for M1
-MI1params = struct('numTrials', numTrials, 'numClasses', numClasses, 'count', ...
-    subject_experiment_number_today, 'trialLength', trialLength, ...
+MI1params = struct('numTrials', numTrials, 'numClasses', numClasses, 'trialLength', trialLength, ...
     'waits', waitList, 'markers', markersList);
 % Parameters for M2
 MI2params = struct('highLim', highFilter, 'lowLim', lowFilter, 'notch', ...
@@ -99,5 +97,6 @@ MI2params = struct('highLim', highFilter, 'lowLim', lowFilter, 'notch', ...
 % Parameters for M4
 MI4params = struct('select', how_many_features_to_select, 'test', ...
     how_many_test_for_class, 'FS', fs, 'vizTrial', vizTrial, 'z',...
-    to_implement_zscore, 'f', frequency_vec, 'window', window, 'overlap', noverlap);
+    to_implement_zscore, 'f', frequency_vec, 'window', window, ...
+    'overlap', noverlap, 'n_features', n_features);
 
