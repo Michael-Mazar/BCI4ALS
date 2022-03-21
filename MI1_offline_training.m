@@ -41,10 +41,11 @@ todayFolder = strcat(subFolder, '\', string(dt));
 if not(isfolder(todayFolder))
     mkdir(todayFolder);
 end
-recordingFolder = strcat(todayFolder, '\', string(params.count), '\');
-if not(isfolder(recordingFolder))
-    mkdir(recordingFolder);
-end
+recordingFolder = todayFolder;
+% recordingFolder = strcat(todayFolder, '\', string(params.count), '\');
+% if not(isfolder(recordingFolder))
+%     mkdir(recordingFolder);
+% end
 %% open stream
 disp('Loading the Lab Streaming Layer library...');
 lib = lsl_loadlib();                    % load the LSL library
