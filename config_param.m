@@ -10,12 +10,12 @@ markersList = [000, 99, startMarker, 9, 1001]; % startRec, endRec, startTrial, e
 lslPath = 'C:\Users\Raz\BCI4ALS\liblsl-Matlab';
 eeglabPath = 'C:\Users\Raz\BCI4ALS\eeglab2021.1';
 rootRecordingPath = 'C:\Users\Raz\BCI4ALS\Recordings';
-recordingFolder = 'C:\Users\Raz\BCI4ALS\Recordings\test\1'; % TODO: change back to'C:\Recordings\New_headset_raz\raz_merged';
-classes{1} = imread('square.jpeg','jpeg'); 
-classes{2} = imread('arrow_left.jpeg','jpeg');
-classes{3} = imread('arrow_right.jpeg','jpeg');
-loaded_temp = load(strcat(recordingFolder,'\trainingVec.mat'));               % load the training vector (which target at which trial)
-trainingVec = loaded_temp.trainingVec;
+recordingFolder = 'C:\Users\Raz\BCI4ALS\Recordings\21_03_22'; % TODO: change back to'C:\Recordings\New_headset_raz\raz_merged';
+trainingImages{1} = imread('square.jpeg','jpeg'); 
+trainingImages{2} = imread('arrow_left.jpeg','jpeg');
+trainingImages{3} = imread('arrow_right.jpeg','jpeg');
+%loaded_temp = load(strcat(recordingFolder,'\trainingVec.mat'));               % load the training vector (which target at which trial)
+%trainingVec = loaded_temp.trainingVec;
 %% Preprocessing parameters
 EEG_chans(1,:) = 'C03';
 EEG_chans(2,:) = 'C04';
@@ -89,8 +89,8 @@ n_features = size(feature_headers, 2);
 %%
 % Parameters for M1
 MI1params = struct('numTrials', numTrials, 'numClasses', numClasses, 'count', ...
-    subject_experiment_number_today, 'trialLength', trialLength, 'waits',...
-    waitList, 'markers', markersList);
+    subject_experiment_number_today, 'trialLength', trialLength, ...
+    'waits', waitList, 'markers', markersList);
 % Parameters for M2
 MI2params = struct('highLim', highFilter, 'lowLim', lowFilter, 'notch', ...
     notchList, 'ICA_threshold', ICA_threshold, 'channelsNum', size(EEG_chans,1), ...

@@ -1,4 +1,4 @@
-function [recordingFolder, trainingVec] = MI1_offline_training(liblsl_path, root_recording_folder, params)
+function [recordingFolder, trainingVec] = MI1_offline_training(liblsl_path, root_recording_folder, params, trainingImages)
 %% MOTOR IMAGERY Training Scaffolding 
 % This code creates a training paradigm with (#) classes on screen for
 % (#) numTrials. Before each trial, one of the targets is cued (and remains
@@ -24,6 +24,7 @@ endRecrding = params.markers(2);
 startTrial = params.markers(3);
 endTrial = params.markers(4);
 Baseline = params.markers(5);
+
 % Training Vector
 trainingVec = prepareTraining(numTrials,numClasses);    % vector with the conditions for each trial
 %% Recording location
@@ -35,7 +36,7 @@ if not(isfolder(subFolder))
 end
 % Get current date
 dt = datetime('now');
-dt.Format = 'dd-MMM-yyyy';
+dt.Format = 'dd-MMM-yyyy-HH-mm';
 todayFolder = strcat(subFolder, '\', string(dt));
 if not(isfolder(todayFolder))
     mkdir(todayFolder);
@@ -86,9 +87,9 @@ for trial = 1:totalTrials
     currentClass = trainingVec(trial);          % What class is it?
     
     % Cue before ready
-    image(flip(trainingImage{currentClass}, 1), 'XData', [0.25, 0.75],...
+    image(flip(trainingImages{currentClass}, 1), 'XData', [0.25, 0.75],...
         'YData', [0.25, 0.75 * ...
-        size(trainingImage{currentClass},1)./ size(trainingImage{currentClass},2)])
+        size(trainingImages{currentClass},1)./ size(trainingImages{currentClass},2)])
     pause(cueLength);                           % Pause for cue length
     cla                                         % Clear axis
     
@@ -100,9 +101,9 @@ for trial = 1:totalTrials
     cla                                         % Clear axis
     
     % Show image of the corresponding label of the trial
-    image(flip(trainingImage{currentClass}, 1), 'XData', [0.25, 0.75],...
+    image(flip(trainingImages{currentClass}, 1), 'XData', [0.25, 0.75],...
         'YData', [0.25, 0.75 * ...
-        size(trainingImage{currentClass},1)./ size(trainingImage{currentClass},2)])    
+        size(trainingImages{currentClass},1)./ size(trainingImages{currentClass},2)])    
     outletStream.push_sample(currentClass);     % class label
     pause(trialLength)                          % Pause for trial length
     cla                                         % Clear axis
