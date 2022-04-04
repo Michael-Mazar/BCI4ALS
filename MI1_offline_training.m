@@ -74,6 +74,31 @@ set(hAx,'color', 'black');                  % set background color
 hAx.XLim = [0, 1];                          % lock axes limits
 hAx.YLim = [0, 1];
 hold on
+
+%% Prepare axes for pics
+dimMainLR = 0.3;
+heightMainLR = 0.35;
+dimMainIdle = 0.5;
+heightMainIdle = 0.25;
+axTrial(1) = axes('Position',[(1-dimMainIdle)/2, heightMainIdle, dimMainIdle, dimMainIdle]);
+axTrial(2) = axes('Position',[(1-dimMainLR)/2, heightMainLR, dimMainLR, dimMainLR]);
+axTrial(3) = axes('Position',[(1-dimMainLR)/2, heightMainLR, dimMainLR, dimMainLR]);
+for ii = 1:length(axTrial)
+    set(axTrial(ii),'color', 'black'); 
+    set(axTrial(ii), 'visible', 'off');
+end
+axFinish = axTrial(1);
+dimClass = 0.4;
+axClasses = [];
+axClasses(1) = axes('Position',[(1-dimMainIdle)/2 (heightMainIdle+dimMainIdle-0.1)/2, dimClass, dimClass]);
+axClasses(2) = axes('Position',[0.01 (heightMainLR+dimMainLR)/2-0.01, dimClass, dimClass]);
+axClasses(3) = axes('Position',[(1-dimClass-0.01) (heightMainLR+dimMainLR)/2-0.01, dimClass, dimClass]);
+for ii = 1:length(axClasses)
+    set(axClasses(ii),'color', 'black'); 
+    set(axClasses(ii), 'visible', 'off');
+end
+axes(hAx)
+
 %% Start Training
 outletStream.push_sample(startRecordings);      % start of recordings. Later, reject all EEG data prior to this marker
 totalTrials = length(trainingVec);
@@ -88,8 +113,8 @@ for trial = 1:totalTrials
     currentClass = trainingVec(trial);          % What class is it?
     
     % Cue before ready
-    image(flip(trainingImages{currentClass}, 1), 'XData', [0.25, 0.75],...
-        'YData', [0.25, 0.75 * ...
+    image(flip(trainingImages{currentClass}, 1), 'XData', [1, 3],...
+        'YData', [1, 3 * ...
         size(trainingImages{currentClass},1)./ size(trainingImages{currentClass},2)])
     pause(cueLength);                           % Pause for cue length
     cla                                         % Clear axis
