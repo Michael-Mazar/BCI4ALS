@@ -113,12 +113,18 @@ for trial = 1:totalTrials
     currentClass = trainingVec(trial);          % What class is it?
     
     % Cue before ready
-    image(flip(trainingImages{currentClass}, 1), 'XData', [1, 3],...
-        'YData', [1, 3 * ...
-        size(trainingImages{currentClass},1)./ size(trainingImages{currentClass},2)])
-    pause(cueLength);                           % Pause for cue length
+        text(0.5,0.5 , 'coming next ',...
+        'HorizontalAlignment', 'Center', 'Color', 'white', 'FontSize', 40);
+    outletStream.push_sample(Baseline);         % Baseline trigger
+    pause(0.5);                         % Pause for ready length
     cla                                         % Clear axis
-    
+    image(flip(trainingImages{currentClass}, 1), 'XData', [0.25, 0.75],...
+    'YData', [0.25, 0.75 * ...
+    size(trainingImages{currentClass},1)./ size(trainingImages{currentClass},2)])    
+    outletStream.push_sample(currentClass);     % class label
+    pause(cueLength)                          % Pause for trial length
+    cla                                         % Clear axis
+
     % Ready
     text(0.5,0.5 , 'Ready',...
         'HorizontalAlignment', 'Center', 'Color', 'white', 'FontSize', 40);
