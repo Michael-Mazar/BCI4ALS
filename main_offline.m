@@ -12,7 +12,7 @@ disp('Finished stimulation and EEG recording. Stop the LabRecorder and press any
 pause;
 %% Run MI2:
 % for manually running - load to the workspace the relevant recordingFolder
-% and its training vector - load(recordingFolder,'\trainingVec'))
+% and its training vector - load(strcat(recordingFolder,'\trainingVec.mat'))
 % Custom recording folder definition - recordingFolder = 'C:\Recordings\New_headset_raz\nadav2_with_touch';
 addpath(string(eeglabPath));     % lab streaming layer library
 eeglab;
