@@ -47,7 +47,7 @@ disp('Finished segmenting the data. Press any key to continue...');
 trials_to_remove_indices = [1]; 
 
 if ~isempty(trials_to_remove_indices)
-    [MIData, trainingVec] = remove_trials(recordingFolder, trials_to_remove_indices, trainingVec);
+    [MIData, trainingVec] = remove_trials(recordingFolder, trials_to_remove_indices, MIData, trainingVec);
 end
 
 %% Run MI4 (Extract features and labels)

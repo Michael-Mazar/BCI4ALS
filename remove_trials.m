@@ -1,8 +1,5 @@
-function [MIData, trainingVec] = remove_trials(recordingFolder, indices_to_remove, trainingVec)
+function [MIData, trainingVec] = remove_trials(recordingFolder, indices_to_remove, MIData, trainingVec)
 % TODO: add description
-
-load(strcat(recordingFolder,'\trainingVec.mat')); % trials labels
-load(strcat(recordingFolder,'\MIData.mat')); % trials EEG data
 
 idleNumBeforeRemoval = sum(trainingVec == 1); 
 leftNumBeforeRemoval = sum(trainingVec == 2);
