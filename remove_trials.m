@@ -1,10 +1,6 @@
 function [MIData, trainingVec] = remove_trials(recordingFolder, indices_to_remove, MIData, trainingVec)
 % TODO: add description
 
-idleNumBeforeRemoval = sum(trainingVec == 1); 
-leftNumBeforeRemoval = sum(trainingVec == 2);
-rightNumBeforeRemoval = sum(trainingVec == 3);  
-
 removedIdleNum = sum(trainingVec(:, indices_to_remove) == 1);
 removedLeftNum = sum(trainingVec(:, indices_to_remove) == 2);
 removedRightNum = sum(trainingVec(:, indices_to_remove) == 3);
@@ -24,13 +20,13 @@ if ~(removedLeftNum == removedRightNum && removedRightNum == removedIdleNum)
 
     disp("Class imbalance after trials removal")
 
-    smallestClassTrialsNum = min([leftNumBeforeRemoval - removedLeftNum, ...
-                            rightNumBeforeRemoval - removedRightNum, ...
-                            idleNumBeforeRemoval - removedIdleNum]);
+    classesTrialsNumToRemove = max([removedLeftNum, removedRightNum, removedIdleNum]) - [removedIdleNum, removedLeftNum, removedRightNum];
+
+    % how many trials to remove from each class to balance classes
 
     [MIData, trainingVec] = balance_classes_after_trials_removal(MIData, ...
                                                                 trainingVec, ...
-                                                                smallestClassTrialsNum);
+                                                                classesTrialsNumToRemove);
 
 end
 
