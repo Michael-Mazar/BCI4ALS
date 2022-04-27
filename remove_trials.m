@@ -1,4 +1,4 @@
-function [MIData, trainingVec] = remove_trials(recordingFolder, indices_to_remove)
+function [MIData, trainingVec] = remove_trials(recordingFolder, indices_to_remove, trainingVec)
 % TODO: add description
 
 load(strcat(recordingFolder,'\trainingVec.mat')); % trials labels
