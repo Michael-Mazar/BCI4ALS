@@ -44,13 +44,15 @@ disp('Finished segmenting the data. Press any key to continue...');
 
 % set trials indices to be remove (e.g., trials_to remove_incides = [1,
 % 15];)
-trials_to_remove_indices = []; 
+[trials_to_remove_indices] = filter_trails(MIData,150);
 
 if ~isempty(trials_to_remove_indices)
-    [MIData, trainingVec] = remove_trials(recordingFolder, trials_to_remove_indices);
+    [MIData, trainingVec] = remove_trials(recordingFolder, trials_to_remove_indices, MIData, trainingVec);
 end
 
 %% Run MI4 (Extract features and labels)
+MI4params.vizTrial = 1;
+MI4params.test = ceil(size(MIData, 1)/(3*3));
 MI4_featureExtraction(recordingFolder, MIData, EEG_chans, trainingVec, bands, times, feature_headers, MI4params, feature_setting);
 disp('Finished extracting features and labels. Press any key to continue...');
 pause;
