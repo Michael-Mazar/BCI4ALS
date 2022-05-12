@@ -16,7 +16,16 @@ Fs = params.FS;                                                 % openBCI Cyton+
 welch = {};
 f = params.f;
 for chan = 1:numChans
-    welch{chan} = pwelch(squeeze(MIData(:,chan,:))',params.window, params.overlap, f, Fs);  % calculate the pwelch for each electrode
+%     pwelch_input = squeeze(MIData(:,chan,:))';
+%     if trials > 1
+%         % This condition is used to fix dimension issues
+%         pwelch_input = pwelch_input';
+%     end
+    pwelch_res = pwelch(squeeze(MIData(:,chan,:))',params.window, params.overlap, f, Fs);  % calculate the pwelch for each electrode
+    if trials == 1
+        pwelch_res = pwelch_res';
+    end
+    welch{chan} = pwelch_res; 
 end
 %% Extract features 
 if feature_setting.Bands

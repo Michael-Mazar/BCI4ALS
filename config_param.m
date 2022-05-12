@@ -1,7 +1,8 @@
 %% Recording parameters
 numClasses = 3;
 numTrials = 4;
-trialLength = 3;  % remember to change times for bandpower!
+% TODO: changed trialLength from 3 to 5 to debug Online code
+trialLength = 5;  % remember to change times for bandpower!
 waitList = [3, 1, 1, 1]; % init, ready, cue, next
 startMarker = 1111;
 markersList = [000, 99, startMarker, 9, 1001]; % startRec, endRec, startTrial, endTrial, baseline 
