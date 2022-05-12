@@ -9,6 +9,11 @@ addpath(string(lslPath) + '\bin'); % lab streaming layer bin
 
 addpath(string(eeglabPath)); 
 eeglab;
+
+% Setup Python interperter
+% TODO: consider adding Python interperter path to config_params
+pyenv('Version','D:\HUJI\BCI\BCI4ALS\pythonTest\venv\Scripts\python.exe');
+
 % Paradigm
 InitWait = waitList(1);             % before trials prep time
 readyLength = waitList(2);                        % time "ready" on screen
