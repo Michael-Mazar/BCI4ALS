@@ -209,7 +209,7 @@ for trial = 1:onlineNumTrials
     ALL_FEATURES = [ALL_FEATURES FeaturesSelected]; % all data to save in the end of recordings
     %%% If Matlab doing predict:
     %myPrediction(decCount) = trainedModel.predictFcn(FeaturesSelected); % TODO: load trained model!!
-    myPrediction(decCount) = randi(3,1);
+    myPrediction(decCount) = predict(ALL_FEATURES);
     cla
     if myPrediction(decCount) == currentClass
         successCount = successCount + 1;
