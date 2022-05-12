@@ -1,52 +1,35 @@
 %function MI_Online_Learning(recordingFolder)
-%% MI Online Scaffolding
-% This code creates an online EEG buffer which utilizes the model trained
-% offline, and corresponding conditions, to classify between the possible labels.
-% Furthermore, this code adds an "online learning" phase in which the
-% subject is shown a specific label which she/he should imagine. After a
-% defined amount of labeled trials, the classifier is updated.
+%% Refresh
+clc; clear; close all;
+%% Parameters
+config_param
+dataFolder = 'D:\HUJI\BCI\BCI4ALS\data';
+addpath(string(lslPath));     % lab streaming layer library
+addpath(string(lslPath) + '\bin'); % lab streaming layer bin
 
-% Assuming: 
-% 1. EEG is recorded using openBCI and streamed through LSL.
-% 2. A preliminary MI classifier has been trained.
-% 3. A different machine/client is reading this LSL oulet stream for the commands sent through this code
-% 4. Target labels are [-1 0 1] (left idle right)
+addpath(string(eeglabPath)); 
+eeglab;
+% Paradigm
+InitWait = waitList(1);             % before trials prep time
+readyLength = waitList(2);                        % time "ready" on screen
+cueLength = waitList(3);                          % time for each cue
+nextLength = waitList(4);                         % time "next" on screen
+% MI4 results
+load(strcat(dataFolder,'\W.mat')); %load W for csp
+load(strcat(dataFolder,'\SelectedIdx.mat')); %load indexes of selected features
+% online params
+online_trails = 6;
+feedback_returns = 5;
+buffer = [];
+ALL_FEATURES = [];
+myPrediction = [];                                  % predictions vector
+decCount = 0;
+successCount = 0;
+onlineTrainingVec = prepareTraining(online_trails,MI1params.numClasses);    % vector with the conditions for each trial
+numChans = size(EEG_chans,1);
 
-% Remaining to be done:
-% 1. Add a "voting machine" which takes the classification and counts how
-% many consecutive answers in the same direction / target to get a high(er)
-% accuracy rate, even though it slows down the process by a large factor.
-% 2. Add an online learn-with-feedback mechanism where there is a visual feedback to
-% one side (or idle) with a confidence bar showing the classification being made.
-% 3. Advanced = add an online reinforcement code that updates the
-% classifier with the wrong & right class classifications.
-% 4. Add a serial classifier which predicts attention levels and updates
-% the classifier only if "focus" is above a certain threshold.
-
-%% This code is part of the BCI-4-ALS Course written by Asaf Harel
-% (harelasa@post.bgu.ac.il) in 2021. You are free to use, change, adapt and
-% so on - but please cite properly if published.
-
-clearvars % change to clear all?
-close all
-clc
-
-%% Addpath for relevant folders - original recording folder and LSL folders
-addpath('YOUR RECORDING FOLDER PATH HERE');
-addpath('YOUR LSL FOLDER PATH HERE');
-    
-%% Set params - %add to different function/file returns param.struct
-params = set_params();
-load('releventFeatures.mat');                       % load best features from extraction & selection stage
-load('trainedModel.mat');                           % load model weights from offline section
-% Load cue images
-images{1} = imread(params.leftImageName, 'jpeg');
-images{2} = imread(params.squareImageName, 'jpeg');
-images{3} = imread(params.rightImageName, 'jpeg');
-cueVec = prepareTraining(numTrials,numConditions);  % prepare the cue vector
-
-%their params:
 %{
+%their params:
 params.feedbackFlag = 1;            % 1-with feedback, 0-no feedback
 params.Fs = 125;                    % openBCI sample rate % Fs = 300;  % Wearable Sensing sample rate
 params.bufferLength = 5;            % how much data (in seconds) to buffer for each classification
@@ -65,30 +48,56 @@ params.commandIdle = 0;             % idle command
 params.readyLength = 1.5;           % time (s) showing "Ready" on screen
 params.cueLength = 1;               % time (s) showing the cue before trial start
 params.endTrial = 999;              % marker sent to command outlet to indicate end of process
-%}
-
-%% Lab Streaming Layer Init
-[command_Outlet, EEG_Inlet] = LSL_Init;
-
-%% Initialize some more variables:
-myPrediction = [];                                  % predictions vector
-myBuffer = [];                                      % buffer matrix
 iteration = 0;                                      % iteration counter
 motorData = [];                                     % post-laPlacian matrix
-decCount = 0;                                       % decision counter
+%}
 
-%% 
-pause(params.bufferPause);                          % give the system some time to buffer data
-myChunk = EEG_Inlet.pull_chunk();                   % get a chunk from the EEG LSL stream to get the buffer going
+%% Recording location
+% Define recording folder location and create the folder:
+subID = input('Please enter subject ID/Name: ');    % prompt to enter subject ID or name
+subFolder = strcat(rootRecordingPath, '\', num2str(subID));
+if not(isfolder(subFolder))
+    mkdir(subFolder);
+end
+% Get current date
+dt = datetime('now');
+dt.Format = 'dd-MMM-yyyy-HH-mm';
+todayFolder = strcat(subFolder, '\', string(dt));
+if not(isfolder(todayFolder))
+    mkdir(todayFolder);
+end
+
+recordingFolder = strcat(todayFolder, '\Online');
+mkdir(recordingFolder);
+
+
+%% open stream
+disp('Loading the Lab Streaming Layer library...');
+lib = lsl_loadlib();                    % load the LSL library
+disp('Opening Marker Stream...');
+info = lsl_streaminfo(lib,'MarkerStream','Markers',1,0,'cf_string','myuniquesourceid23443');
+outletStream = lsl_outlet(info);        % create an outlet stream using the parameters above
+disp('Resolving an EEG Stream...');
+result = {};
+lslTimer = tic;
+while isempty(result)
+    result = lsl_resolve_byprop(lib,'type','EEG'); 
+end
+disp('Success resolving!');
+EEG_Inlet = lsl_inlet(result{1});
+
+
+%% Start connection to python
+% HOST = 'localhost';
+% PORT = 50007;
+% disp('Connecting to python script!');
+% t = tcpclient(HOST, PORT);
+% disp('Connected to Python GUI');
+% TODO: consider sending the cue vector to the GUI
 
 %% Screen Setup 
 monitorPos = get(0,'MonitorPositions'); % monitor position and number of monitors
-monitorN = size(monitorPos, 1);
-choosenMonitor = 1;                     % which monitor to use TODO: make a parameter                                 
-if choosenMonitor < monitorN            % if no 2nd monitor found, use the main monitor
-    choosenMonitor = 1;
-    disp('Another monitored is not detected, using main monitor.')
-end
+choosenMonitor = 1;                     % which monitor to use                              
 figurePos = monitorPos(choosenMonitor, :);  % get choosen monitor position
 figure('outerPosition',figurePos);          % open full screen monitor
 MainFig = gcf;                              % get the figure and axes handles
@@ -101,102 +110,150 @@ hAx.XLim = [0, 1];                          % lock axes limits
 hAx.YLim = [0, 1];
 hold on
 
-%% This is the main online script
+dimMainLR = 0.3;
+heightMainLR = 0.35;
+dimMainIdle = 0.5;
+heightMainIdle = 0.25;
+axTrial(1) = axes('Position',[(1-dimMainIdle)/2, heightMainIdle, dimMainIdle, dimMainIdle]);
+axTrial(2) = axes('Position',[(1-dimMainLR)/2, heightMainLR, dimMainLR, dimMainLR]);
+axTrial(3) = axes('Position',[(1-dimMainLR)/2, heightMainLR, dimMainLR, dimMainLR]);
+for ii = 1:length(axTrial)
+    set(axTrial(ii),'color', 'black'); 
+    set(axTrial(ii), 'visible', 'off');
+end
+axFinish = axTrial(1);
+dimClass = 0.4;
+axClasses = [];
+axClasses(1) = axes('Position',[(1-dimMainIdle)/2 (heightMainIdle+dimMainIdle-0.1)/2, dimClass, dimClass]);
+axClasses(2) = axes('Position',[0.01 (heightMainLR+dimMainLR)/2-0.01, dimClass, dimClass]);
+axClasses(3) = axes('Position',[(1-dimClass-0.01) (heightMainLR+dimMainLR)/2-0.01, dimClass, dimClass]);
+for ii = 1:length(axClasses)
+    set(axClasses(ii),'color', 'black'); 
+    set(axClasses(ii), 'visible', 'off');
+end
+axes(hAx)
 
-for trial = 1:numTrials
-    command_Outlet.push_sample(params.startTrialMarker)
-    currentClass = cueVec(trial);
-    % ready cue
-    text(0.5,0.5 , 'Ready',...
-        'HorizontalAlignment', 'Center', 'Color', 'white', 'FontSize', 40);        
-    pause(params.readyLength)
-    % display target cue
-    image(flip(images{currentClass}, 1)  'XData', [0.25, 0.75],...
-        'YData', [0.25, 0.75 * ...
-        size(images{currentClass},1) ./ size(images{currentClass},2)])
-    pause(params.cueLength);                           % Pause for cue length
+
+
+%% This is the main online script
+onlineNumTrials = length(onlineTrainingVec);
+for trial = 1:onlineNumTrials
+    %command_Outlet.push_sample(startMarker);
+    currentClass = onlineTrainingVec(trial);
+    % next cue
+    text(0.5,0.5 , 'Next',...
+        'HorizontalAlignment', 'Center', 'Color', 'white', 'FontSize', 40);
+    %outletStream.push_sample(Baseline);         % needed??
+    pause(nextLength);
+    cla
+    image(flip(trainingImages{currentClass}, 1), 'XData', [0.25, 0.75],...
+    'YData', [0.25, 0.75 * ...
+    size(trainingImages{currentClass},1)./ size(trainingImages{currentClass},2)])
+    %outletStream.push_sample(currentClass);     % needed??
+    pause(cueLength);                           % Pause for cue length
     cla                                         % Clear axis
     % ready cue
     text(0.5,0.5 , 'Ready',...
         'HorizontalAlignment', 'Center', 'Color', 'white', 'FontSize', 40);        
-    pause(params.readyLength)
+    %outletStream.push_sample(Baseline);         % needed??
+    pause(readyLength);                         % Pause for ready length
+    % asaf also read first data before: (why needed??)
+    cla                                         % Clear axis
+    % Show image of the corresponding label of the trial
+    image(flip(trainingImages{currentClass}, 1), 'XData', [0.25, 0.75],...
+        'YData', [0.25, 0.75 * ...
+        size(trainingImages{currentClass},1)./ size(trainingImages{currentClass},2)])    
+    cur_data = EEG_Inlet.pull_chunk();   % get a chunk from the EEG LSL stream to get the buffer going
+    pause(0.1);
+    %outletStream.push_sample(currentClass);     % class label
     
     trialStart = tic;
-    while toc(trialStart) < trialTime
-        iteration = iteration + 1;                  % count iterations
-        
-        myChunk = EEG_Inlet.pull_chunk();           % get data from the inlet
-
-        pause(0.1)
-        % check if myChunk is empty and print status, also
-        % apply LaPlacian filter on current chunk of data and apped to
-        % local buffer:
-        if ~isempty(myChunk)
-            % Apply LaPlacian Filter (based on default electrode placement for Wearable Sensing - change it to your electrode locations)
-            motorData(1,:) = myChunk(2,:) - ((myChunk(8,:) + myChunk(3,:) + myChunk(1,:) + myChunk(13,:))./4);    % LaPlacian (Cz, F3, P3, T3)
-            motorData(2,:) = myChunk(6,:) - ((myChunk(8,:) + myChunk(5,:) + myChunk(7,:) + myChunk(16,:))./4);    % LaPlacian (Cz, F4, P4, T4)
-            myBuffer = [myBuffer motorData];        % append new data to the current buffer
-            motorData = [];
+    buffer = [];
+    % In their code the repeat same class X times (one by one) - if we
+    % want to do this we need to change this while loop (to toc(trialStart)
+    % < feedback_returns*trialLength) and insert below&above code
+    while size(buffer,2) <= trialLength*fs
+        cur_data = EEG_Inlet.pull_chunk();
+        pause(0.1);
+        if ~isempty(cur_data)
+            buffer = [buffer, cur_data];
         else
-            fprintf(strcat('Houston, we have a problem. Iteration:',num2str(iteration),' did not have any data.'));
-        end
-        
-        % Check if buffer size exceeds the buffer length
-        if (size(myBuffer,2)>(bufferLength*Fs))
-            decCount = decCount + 1;            % decision counter
-            block = [myBuffer];                 % move data to a "block" variable
-            
-            % Pre-process the data
-            block = lowpass(block',40,Fs)';     % the lowpass frequency needs to match the training phase
-            block = highpass(block',0.3,Fs)';   % the highpass frequency also needs to match the training phase
-            
-            % Extract features from the buffered block:
-            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-            %%%% Add your feature extraction function from offline stage %%%%%%
-            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-            EEG_Features = ExtractPowerBands(block,releventFeatures,Fs);
-            
-            % Predict using previously learned model:
-            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-            %%%%%% Use whatever classfication method used in offline MI %%%%%%%
-            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-            myPrediction(decCount) = trainedModel.predictFcn(EEG_Features);
-            
-            if feedbackFlag
-                %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-                % write a function that plots estimate on some type of graph: %
-                %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-                plotEstimate(myPrediction); hold on
-            end
-            fprintf(strcat('Iteration:', num2str(iteration)));
-            fprintf(strcat('The estimated target is:', num2str(myPrediction(decCount))));
-            
-            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-            % write a function that sends the estimate to the voting machine %%
-            %     the output should be between [-1 0 1] to match classes     %%
-            %       this could look like a threshold crossing feedback       %%
-            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-            [final_vote] = sendVote(myPrediction);
-            
-            % Update classifier - this should be done very gently! 
-            if final_vote ~= (cueVec(trial)-numConditions-1)
-                wrongClass(decCount,:,:) = EEG_Features;
-                wrongClassLabel(decCount) = cueVec(trial);
-                %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-                %%% Write a function that updates the trained model %%%%%%%
-                %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-                trainedModel = OnlineLearn(trainedModel,EEG_Features,currentClass);
-            else
-                correctClass(decCount,:,:) = EEG_Features;
-                correctLabel(decCount) = cueVec(trial);
-                % Send command through LSL:
-                command_Outlet.push_sample(final_vote);
-            end
-            
-            % clear buffer
-            myBuffer = [];
+            disp(strcat('no data to pull in trial', num2str(trial), 'after', num2str(toc(start)), 'seconds'));
         end
     end
+    % end trial - start process
+    cla                                         % Clear axis
+    text(0.5,0.5 , 'Processing',...
+        'HorizontalAlignment', 'Center', 'Color', 'white', 'FontSize', 40);
+    EEG = pop_importdata('dataformat', 'matlab', 'nbchan', numChans, 'data', buffer, 'srate', fs, 'pnts', 0, 'xmin', 0);
+    %outletStream.push_sample(endTrial);         % needed???
+    decCount = decCount + 1;
+    MI2params.offline = 0;
+    [EEG_arr] = preprocess(EEG, recordingFolder, eeglabPath, unused_channels, MI2params);
+    EEG_data = EEG_arr(6).data;
+    MIData = [];
+    for channel=1:numChans
+        MIData(1, channel, :) = EEG_data(channel, :);
+    end
+    [MIFeatures] = feature_engineering(recordingFolder, MIData, bands, times, W, MI4params, feature_setting);
+
+    % TODO: remove the following line
+    SelectedIdx = 1:10;
+    FeaturesSelected = MIFeatures(:, SelectedIdx);
+
+    ALL_FEATURES = [ALL_FEATURES FeaturesSelected]; % all data to save in the end of recordings
+    %%% If Matlab doing predict:
+    %myPrediction(decCount) = trainedModel.predictFcn(FeaturesSelected); % TODO: load trained model!!
+    myPrediction(decCount) = randi(3,1);
+    cla
+    if myPrediction(decCount) == currentClass
+        successCount = successCount + 1;
+        text(0.5,0.5 , 'Prediction was right!',...
+            'HorizontalAlignment', 'Center', 'Color', 'white', 'FontSize', 40);
+        pause(1);
+    else
+        text(0.5,0.5 , 'Prediction was wrong :(',...
+            'HorizontalAlignment', 'Center', 'Color', 'white', 'FontSize', 40);
+        pause(1);
+    end
+    cla                                         % Clear axis
+    image(flip(trainingImages{myPrediction(decCount)}, 1), 'XData', [0.25, 0.75],...
+    'YData', [0.25, 0.75 * ...
+    size(trainingImages{myPrediction(decCount)},1)./ size(trainingImages{myPrediction(decCount)},2)])
+    hold on % replace to pause?
+            
+    %{ 
+    %%% If python doing precidt:
+    save(strcat(recordingFolder,'\', 'online_trial_features.mat'),'EEG_data');
+    write(t, "next"); % notify python data is ready
+    %Wait for signal to continue to the next feedback
+    wait_for_message = 1;
+    while (wait_for_message)
+        msg_length = t.NumBytesAvailable;
+        if msg_length > 0
+            bytes = read(t);
+            %[bytes, count] = read(t, [1, t.BytesAvailable]);
+            disp('Got it!!');
+            wait_for_message = 0;
+            % Check if messsage == "feedback"
+            disp(char(bytes))                  
+        end
+    end
+    %}
+    
+    %%% TODO: add co-adaptive after X trials
 end
+% finish recording
+%command_Outlet.pushSample(endRecrding);
+save(strcat(recordingFolder, '\', 'online_trainingVec.mat'),'trainingVec');
+save(strcat(recordingFolder,'\', 'online_all_features.mat'),'ALL_FEATURES');
+text(0.5,0.2 , strcat(num2str(successCount),' trials succeed Out Of '...
+        ,num2str(onlineNumTrials), ' trials'),...
+        'HorizontalAlignment', 'Center', 'Color', 'white', 'FontSize', 40);
+pause(2);
+cla
+text(0.5,0.2 , strcat('Precentage is ',...
+    num2str(100*(successCount/onlineNumTrials)),'%'),...
+    'HorizontalAlignment','Center', 'Color', 'white', 'FontSize', 40);
+pause(2);
 disp('Finished')
-command_Outlet.pushSample(params.endTrial);
