@@ -35,6 +35,7 @@ else
 end
 MIFeaturesLabel = NaN(trials,numChans,numSpectralFeatures); % init features + labels matrix
 for trial = 1:trials                                % run over all the trials 
+    
     % CSP: using W computed above for all channels at once
     % Extrac the variance of CSP
     temp = var((W'*squeeze(MIData(trial,:,:)))');   % apply the CSP filter on the current trial EEG data

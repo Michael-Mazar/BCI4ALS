@@ -5,7 +5,6 @@ function[EEG] = clean_ica_components(EEG, clean_label_min_threshold)
 %                           an IC with unwanted labels will be cleaned from
 %                           EEG.data
 
-
 EEG = pop_runica(EEG, 'icatype', 'runica', 'extended',1,'interrupt','on');
 EEG = eeg_checkset( EEG );
 EEG = pop_iclabel(EEG, 'default');
@@ -25,7 +24,6 @@ EEG = eeg_checkset( EEG );
 
 % An empty array as the second argument causes pop_subcomp to remove all
 % previously flagged components
-
 % labels are in EEG.etc.ic_classification.ICLabel
 EEG = pop_subcomp( EEG, [], 0);
 EEG = eeg_checkset( EEG );
