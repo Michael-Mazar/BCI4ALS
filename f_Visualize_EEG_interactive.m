@@ -1,30 +1,7 @@
-function f_Visualize_EEG_interactive(EEG_Arr,EEG_n)
+function f_Visualize_EEG_interactive(s_EEG)
 %% Inputs: 
 % EEG_arr - A structure containing different EEGLAB Structures (Different stages)
 % e - The select EEGLAB Structure
-%% Decide on a EEG dataset in a particular stage
-switch EEG_n
-    case 1
-        s_EEG = EEG_Arr(1);
-        disp('Selected original EEG data before any filtering') 
-    case 2
-        s_EEG = EEG_Arr(2);
-        disp('Selected EEG data after high pass filter')
-    case 3
-        s_EEG = EEG_Arr(3);
-        disp('Selected EEG data after low pass fitlers')
-    case 4
-        s_EEG = EEG_Arr(4);
-        disp('Selected EEG data after bandpass fitlers')
-    case 5
-        s_EEG = EEG_Arr(5);
-        disp('Selected EEG data after laplacian filters')
-    case 6
-        s_EEG = EEG_Arr(6);
-        disp('Selected EEG data after ICA filter')
-    otherwise
-        disp('No dataset specified or invalid selection, going with the default')
-end
 %% Load channel location into EEG structure
 % montage_file = 'montage_ultracortex.ced';
 chan_loc_filename = 'chan_loc.locs';
@@ -42,9 +19,9 @@ for i=1:length(old_event_labels)
     example1Idx = strcmp(allEvents, old_event_labels{i});
    [s_EEG.event(example1Idx).type] = deal(new_event_labels{i});
 end
-pop_eegplot(s_EEG, 1, 1, 1);
+
 %% Visualize artefact rejection
-vis_artifacts(EEG_Arr(4),EEG_Arr(5))
+% vis_artifacts(EEG_Arr(4),EEG_Arr(5))
 % %% Plot topoplot
 % pop_topoplot(EEG, 0,1:length(EEG.chanlocs),EEG.setname,[2 4],0,'electrodes','on');
 % % saveas(figure(1), [plot_folder, EEG.setname], 'png')
@@ -59,22 +36,44 @@ vis_artifacts(EEG_Arr(4),EEG_Arr(5))
 %                    {s_EEG.pnts, [s_EEG.xmin s_EEG.xmax]*1000, s_EEG.srate, [0], 'plotitc', 'off', 'ntimesout', 50, 'padratio', 1});
 
 %% 
-pop_newtimef(s_EEG, 1, 2, [1000,2000], 0); % do not pop-up window
+
+
+%% Time frequency plots for electrodes
+n_rows = 3;
+n_col = 2; % Plot Spectogram for trial and 
+chan_names = {s_EEG.chanlocs.labels};
+figure;
+sgtitle(s_EEG.setname) 
+for elec = 1:n_rows % Run for first n electrodes
+    subplot(n_col,n_rows,elec)
+    title('Electrode: ' + string(chan_names{elec}))
+    pop_newtimef(s_EEG, ...
+    1, elec, [-1500, 5500], [3 0.5], 'maxfreq', 35, 'padratio', 16, ...
+    'plotphase', 'on', 'timesout', 200, 'plotitc','off', 'baseline', [0 1000]);
+    subplot(n_col,n_rows,elec+n_rows)
+    pop_newtimef(s_EEG, ...
+    1, elec, [-1500, 5500], [3 0.5], 'maxfreq', 40, 'padratio', 16, ...
+    'plotphase', 'on', 'timesout', 200, 'plotitc','off', 'baseline', [0 1000], 'alpha', .10);
+%%
+
+% pop_newtimef(s_EEG, 1); % Plot C3 Channel ERSP
+% figure;
+% pop_newtimef(s_EEG, 1, 2, [0,5000], 1); % Plot C4 Channel ERSP
                
 % %% Time Frequency plot on all electrodes
-% for elec = 1:s_EEG.nbchan
-%     [ersp,itc,powbase,times,freqs,erspboot,itcboot] = pop_newtimef(s_EEG, ...
-%     1, elec, [s_EEG.xmin s_EEG.xmax]*1000, [3 0.5], 'maxfreq', 50, 'padratio', 16, ...
-%     'plotphase', 'off', 'timesout', 60, 'alpha', .05, 'plotersp','off', 'plotitc','off');
-%     if elec == 1  % create empty arrays if first electrode
-%         allersp = zeros([ size(ersp) s_EEG.nbchan]);
-%         allitc = zeros([ size(itc) s_EEG.nbchan]);
-%         allpowbase = zeros([ size(powbase) s_EEG.nbchan]);
-%         alltimes = zeros([ size(times) s_EEG.nbchan]);
-%         allfreqs = zeros([ size(freqs) s_EEG.nbchan]);
-%         allerspboot = zeros([ size(erspboot) s_EEG.nbchan]);
-%         allitcboot = zeros([ size(itcboot) s_EEG.nbchan]);
-%     end;
+% % for elec = 1:s_EEG.nbchan
+% %     [ersp,itc,powbase,times,freqs,erspboot,itcboot] = pop_newtimef(s_EEG, ...
+% %     1, elec, [s_EEG.xmin s_EEG.xmax]*1000, [3 0.5], 'maxfreq', 50, 'padratio', 16, ...
+% %     'plotphase', 'off', 'timesout', 60, 'alpha', .05, 'plotersp','off', 'plotitc','off');
+% %     if elec == 1  % create empty arrays if first electrode
+% %         allersp = zeros([ size(ersp) s_EEG.nbchan]);
+% %         allitc = zeros([ size(itc) s_EEG.nbchan]);
+% %         allpowbase = zeros([ size(powbase) s_EEG.nbchan]);
+% %         alltimes = zeros([ size(times) s_EEG.nbchan]);
+% %         allfreqs = zeros([ size(freqs) s_EEG.nbchan]);
+% %         allerspboot = zeros([ size(erspboot) s_EEG.nbchan]);
+% %         allitcboot = zeros([ size(itcboot) s_EEG.nbchan]);
+% %     end;
 %     allersp (:,:,elec) = ersp;
 %     allitc (:,:,elec) = itc;
 %     allpowbase (:,:,elec) = powbase;

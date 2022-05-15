@@ -29,6 +29,7 @@ vizChans = [1,2];             % INSERT which 2 channels you want to compare
 % create power spectrum figure:
 f1 = figure('name','PSD','NumberTitle','off');
 sgtitle(['Power Spectrum For The Choosen Electrode']);
+
 % compute power Spectrum per electrode in each class
 psd = nan(numChans,numClasses,2,1000); % init psd matrix
 for chan = 1:numChans
@@ -97,6 +98,7 @@ ylabel('CSP dimension 2')
 zlabel('CSP dimension 3')
 
 clear leftClassCSP rightClassCSP Wviz lambdaViz Aviz
+
 %% calculate features
 [MIFeatures] = feature_engineering(recordingFolder, MIData, bands, times, W, params, feature_setting);
 %% Split to training and test sets
@@ -131,7 +133,7 @@ SelectedIdx = selected(1:Features2Select);
 FeaturesTrainSelected = FeaturesTrain(:,SelectedIdx);       % updating the matrix feature
 FeaturesTest = FeaturesTest(:,SelectedIdx);                 % updating the matrix feature
 
-f_Visualize_FeatureSelect(class, features_headers, numChans, params.n_features);
+% f_Visualize_FeatureSelect(class, features_headers, numChans, params.n_features);
 % create mat
 %%
 % saving

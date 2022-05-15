@@ -36,9 +36,8 @@ MIData = [];                                                    % initialize mai
 
 %% Main data segmentation process:
 for trial = 1:trials
-    [MIData] = sortElectrodes(MIData,EEG_data,EEG_event,Fs,trialLength,mark1Index(trial),numChans,trial);
+    [MIData] = sortElectrodes(MIData,EEG_data, EEG_event ,Fs,trialLength,mark1Index(trial),numChans,trial);
 end
-
 save(strcat(recordingFolder,'\MIData.mat'),'MIData');           % save sorted data
 
 end
