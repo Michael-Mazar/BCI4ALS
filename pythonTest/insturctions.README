@@ -1,3 +1,5 @@
+Requirments: Python 3.8 (or newer)
+
 One time installation (virtual env + packages):
 python -m venv venv
 .\venv\Scripts\activate.bat

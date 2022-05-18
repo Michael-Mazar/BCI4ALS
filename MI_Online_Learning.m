@@ -30,8 +30,16 @@ ALL_FEATURES = [];
 myPrediction = [];                                  % predictions vector
 decCount = 0;
 successCount = 0;
-onlineTrainingVec = prepareTraining(online_trails,MI1params.numClasses);    % vector with the conditions for each trial
 numChans = size(EEG_chans,1);
+
+
+onlineTrainingVecAllClasses = prepareTraining(online_trails,MI1params.numClasses);    % vector with the conditions for each trial
+
+% Keep only relevant classes for online prediciton (e.g., Left and Right)
+% IDLE = 1, LEFT = 2, RIGHT = 3
+predictionClasses = [2, 3];
+trainingVectorIndices = find(ismember(onlineTrainingVecAllClasses, predictionClasses));
+onlineTrainingVec = onlineTrainingVecAllClasses(predictionClassesIndices);
 
 %{
 %their params:
@@ -209,7 +217,11 @@ for trial = 1:onlineNumTrials
     ALL_FEATURES = [ALL_FEATURES FeaturesSelected]; % all data to save in the end of recordings
     %%% If Matlab doing predict:
     %myPrediction(decCount) = trainedModel.predictFcn(FeaturesSelected); % TODO: load trained model!!
+
     myPrediction(decCount) = predict(ALL_FEATURES);
+
+    % TODO: REMOVE THE randsample AFTER FINISHING TESTING THE ONLINE FLOW!
+%     myPrediction(decCount) = randsample(predictionClasses, 1);
     cla
     if myPrediction(decCount) == currentClass
         successCount = successCount + 1;
