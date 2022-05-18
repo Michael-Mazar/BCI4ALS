@@ -72,11 +72,10 @@ class Classifier():
 
 RECORDING_FOLDER = r'D:/HUJI/BCI/BCI4ALS/data/'
 
-
 if __name__ == '__main__':
 
     classifier = Classifier(recordings_folder=RECORDING_FOLDER)
-    
+
     if action == "train":
         X_file = r'AllDataInFeatures'
         y_file = r'trainingVec'
@@ -112,7 +111,7 @@ if __name__ == '__main__':
         if datapoints.ndim == 1:
             datapoints = datapoints.reshape(1, -1)
         
-        prediction = classifier.predict_class(datapoints)
+        prediciton = classifier.predict_class(datapoints)
     
     else:
         print("Unsupported action: {}\nSupported actions are: 'train' and 'predict'".format(action))

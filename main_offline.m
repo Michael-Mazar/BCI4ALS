@@ -8,7 +8,7 @@ clc; clear; close all;
 config_param
 %% Run MI1
 [recordingFolder, trainingVec] = MI1_offline_training(lslPath, rootRecordingPath, MI1params, trainingImages); % Removed classes and trial length
-disp('Finished stimulation and EEG recording. Stop the LabRecorder and press any key to continue...');
+disp('Finished stimulatireon and EEG recording. Stop the LabRecorder and press any key to continue...');
 pause;
 %% Run MI2:
 % for manually running - load to the workspace the relevant recordingFolder
