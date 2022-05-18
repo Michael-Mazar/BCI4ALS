@@ -13,7 +13,7 @@ from sklearn import metrics
 import pickle
 
 class Classifier():
-    def __init__(self, recordings_folder, model_file_path="model"):
+    def __init__(self, recordings_folder, model_file_path="pythonTest/model"):
         self.recordings_folder = recordings_folder
         self.model_file_path = model_file_path
         self.model = None
@@ -41,6 +41,7 @@ class Classifier():
                 print ("Saved model to file named {}".format(self.model_file_path))
         except BaseException as e:
             print("Exception while trying to save model to file{}: \n Exception:{}".format(self.model_file_path, e))
+            raise e
         
 
     def load_model(self):
@@ -49,6 +50,7 @@ class Classifier():
                 self.model = pickle.load(f)
         except BaseException as e:
             print("Exception while trying to read model from file {}: \n Exception:{}".format(self.model_file_path, e))
+            raise e
         
 
     def load_data(self, features_file_name, labels_file_name):
@@ -70,7 +72,7 @@ class Classifier():
         pred = self.model.predict(datapoint)
         return pred
 
-RECORDING_FOLDER = r'/Users/osherm/Desktop/HUJI/BCI/BCI4ALS/data'
+RECORDING_FOLDER = r'D:/HUJI/BCI/BCI4ALS/data/'
 
 if __name__ == '__main__':
 
