@@ -1,3 +1,8 @@
 Pip*
 BCI4ALS.code-workspace
 *.zip
+*.txt
+*.mat
+data/combined_all/EEG.fdt
+data/combined_all/EEG.set
+data/EEG.xdf
