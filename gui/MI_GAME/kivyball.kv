@@ -1,0 +1,23 @@
+<MainScreen>
+    FloatLayout:
+        Background:
+            id: background
+            canvas.before:
+                Rectangle:
+                    pos: self.pos
+                    size: root.width, root.height 
+                    Color:
+                        rgba: 0.52, 0.8, 0.92, 1
+                Rectangle
+                    size: root.width, root.height  
+                    pos: self.pos[0], self.pos[1]
+                    texture: self.floor_texture
+                Rectangle:
+                    size: self.width, 104
+                    pos: self.pos[0], self.pos[1] + self.height - 138
+                    texture: self.cloud_texture
+            Label:
+                id: score
+                text: 'Score 0'
+
+                

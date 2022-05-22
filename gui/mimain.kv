@@ -1,0 +1,475 @@
+
+GameWidget:
+<GameWidget>:
+    Button:
+        text : root.game_button
+        pos_hint : {"x": None, "y": None}
+        pos : 15, 10
+        size : 125,75
+        background_color : 1, 0, 0, 1
+        on_press : root.bg_sound()
+        on_release : root.start_game()
+        id : btn
+        font_name : "fonts/Eurostile.ttf"
+        font_size : 22
+
+    Label:
+        id : lbl
+        opacity : 0
+        text : "G  A  M  E   O  V  E  R"
+        color : 0, 1, 1, 0.7
+        font_size : 30
+        font_name : "fonts/Sackers-Gothic-Std-Light.ttf"
+
+    Label:
+        id : lblscore
+        size : 20, 20
+        text : "SCORE: "+str(root.score)
+        font_name : "fonts/Eurostile.ttf"
+        font_size : 22
+
+    Label:
+        id : lblHscore
+        size : 20, 20
+        text : "HIGHEST: "+str(root.highscore)
+        font_name : "fonts/Eurostile.ttf"
+        font_size : 22   
+
+    Label:
+        id : lblgover
+        opacity : 0
+        color : 0, 0.5, 1, 0.8
+        font_size : 30
+        font_name : "fonts/Sackers-Gothic-Std-Light.ttf"
+
+    Button:
+        id : btnrestartgame
+        text : "RESTART GAME"
+        opacity : 0
+        background_color : 1, 0, 0, 1
+        size : 125,75 
+        on_release : root.game_reset()
+
+
+<ProgressWidget>
+    on_leave:
+        progress_relative = 0
+        progress_percent = 0
+    
+    MDBoxLayout:
+        orientation: "vertical"
+
+        MDBoxLayout:
+            orientation: "vertical"
+            padding: dp(30)
+            spacing: dp(30)
+
+            AKCircularProgress:
+                id: progress_percent
+                pos_hint: {"center_x": .5, "center_y": .5}
+                size_hint: None, None
+                size: dp(100), dp(100)
+                percent_type: "percent"
+                start_deg: 180
+                end_deg: 540
+
+            MDBoxLayout:
+                spacing: dp(5)
+
+                MDBoxLayout:
+
+                MDRaisedButton:
+                    text: "0"
+                    on_release: progress_percent.current_percent = 0
+
+                MDRaisedButton:
+                    text: "45"
+                    on_release: progress_percent.current_percent = 45
+
+                MDRaisedButton:
+                    text: "100"
+                    on_release: progress_percent.current_percent = 100
+
+                MDBoxLayout:
+
+            AKCircularProgress:
+                id: progress_relative
+                pos_hint: {"center_x": .5, "center_y": .5}
+                size_hint: None, None
+                size: dp(100), dp(100)
+                percent_type: "percent"
+                start_deg: 240
+                end_deg: 480
+                percent_type: "relative"
+                max_percent: 25
+
+            MDBoxLayout:
+                spacing: dp(5)
+
+                MDBoxLayout:
+
+                MDRaisedButton:
+                    text: "0"
+                    on_release: progress_relative.current_percent = 0
+
+                MDRaisedButton:
+                    text: "10"
+                    on_release: progress_relative.current_percent = 10
+
+                MDRaisedButton:
+                    text: "25"
+                    on_release: progress_relative.current_percent = 25    
+<CoAdaptiveScreen>
+    canvas.before:
+        Rectangle:
+            pos: self.pos
+            size: root.width, root.height
+        Color:
+            rgb: 0,0,0
+    AnchorLayout:
+        anchor_x: 'left'
+        anchor_y: 'center'
+        MDIconButton:
+            icon: "arrow-left-thick"
+            icon_size: "64sp"
+            on_release: 
+                root.manager.current = 'menu' 
+                root.manager.transition.direction = 'right'
+    GameWidget:
+        id: test_game
+
+<StartScreen>:
+    canvas.before:
+        Rectangle:
+            pos: self.pos
+            size: root.width, root.height
+        Color:
+            rgb: 1, 0.980, 0.980
+                 
+    FloatLayout:
+        size_hint: 1, 1
+        pos_hint: {'center_x': 0.5, 'center_y': .5}
+        canvas.before:
+            RoundedRectangle:
+                size: self.size
+                pos: self.pos
+                radius: [dp(10)]
+        
+        BoxLayout:
+            size_hint: .9, .8
+            orientation: 'vertical'
+            pos_hint: {'center_x': 0.5, 'center_y': .5}
+            spacing: dp(20)
+
+            Image:
+                size_hint_y: None
+                source:"brain_icon.png"
+                width: 100
+                allow_stretch: True
+            
+            # Image:    
+            #     size_hint_x: 1
+            #     allow_stretch: True
+
+            MDLabel:
+                text: "Welcome to BCI Training!"
+                halign: "center"
+                theme_text_color: "Custom"
+                text_color: 0, 0, 0.8, 1
+                font_size: 25
+            
+            MDFillRoundFlatIconButton:
+                text: "Applications"
+                icon: "apps"
+                line_color: 0, 1, 0, 1
+                pos_hint: {"center_x": .5, "center_y": .5}
+                size_hint : .7,None
+                on_press: 
+                    root.manager.current = 'application'
+                    root.manager.transition.direction = 'left'
+
+            MDFillRoundFlatIconButton:
+                text: "Co-adaptive training"
+                icon: "weight-lifter"
+                line_color: 0, 1, 0, 1
+                pos_hint: {"center_x": .5, "center_y": .5}
+                size_hint : .7,None
+                on_press: 
+                    root.manager.current = 'game_screen'
+                    root.manager.transition.direction = 'left'
+            
+            MDFillRoundFlatIconButton:
+                text: "Offline training"
+                icon: "run-fast"
+                line_color: 0, 1, 0, 1
+                pos_hint: {"center_x": .5, "center_y": .5}
+                size_hint : .7,None
+                on_press: 
+                    root.manager.current = 'offline'
+                    root.manager.transition.direction = 'left'
+                
+            MDFillRoundFlatIconButton:
+                text: "Configurations"
+                icon: "cog"
+                line_color: 0, 1, 0, 1
+                pos_hint: {"center_x": .5, "center_y": .5}
+                on_press: 
+                    root.manager.current = 'progress_widget'
+                    root.manager.transition.direction = 'left'
+                size_hint : .7,None
+
+            MDFillRoundFlatIconButton:
+                text: "Quit"
+                icon: "exit-to-app"
+                line_color: 0, 1, 0, 1
+                pos_hint: {"center_x": .5, "center_y": .5}
+                on_press: root.manager.current = 'main'
+                size_hint : .7,None
+
+<ResultScreen>
+    canvas.before:
+        Rectangle:
+            pos: self.pos
+            size: root.width, root.height
+        Color:
+            rgb: 1, 0.980, 0.980
+
+    AnchorLayout:
+        anchor_x: 'left'
+        anchor_y: 'center'
+        MDIconButton:
+            icon: "arrow-left-thick"
+            icon_size: "64sp"
+            on_release: 
+                root.manager.current = 'menu' 
+                root.manager.transition.direction = 'right'
+
+    FloatLayout:
+        size_hint: 1, 1
+        pos_hint: {'center_x': 0.5, 'center_y': .5}
+        canvas.before:
+            RoundedRectangle:
+                size: self.size
+                pos: self.pos
+                radius: [dp(10)]        
+            
+        
+        BoxLayout:
+            size_hint_y: 0.9
+            orientation: 'vertical'
+            pos_hint: {'center_x': .5, 'center_y': .5}
+            # padding: dp(30) - Padding causes weird bug where game starts
+
+            BoxLayout:
+                # canvas.before:
+                #     Color:
+                #         rgb: 0, 0, 0
+                #     Line:
+                #         rectangle: self.x,self.y,self.width,self.height
+                # size_hint_x: 0.5
+                size_hint_y: 0.5
+                orientation: 'vertical'
+                pos_hint: {'center_x': .5, 'center_y': .5}
+                # padding: dp(30) - Padding causes weird bug where game starts
+ 
+            
+            BoxLayout:
+                size_hint_y: 0.5
+                orientation: 'vertical'
+                pos_hint: {'center_x': .5, 'center_y': .5}
+
+                BoxLayout:
+                    size_hint_y: 0.5
+                    orientation: 'horizontal'
+                    pos_hint: {'center_x': 0.5, 'center_y': .5} 
+                
+
+                    MDLabel:
+                        text: "Accuracy:"
+                        pos_hint: {"center_x": .5, "center_y": .5}
+                        halign: "center"
+                        theme_text_color: "Custom"
+                        text_color: 0, 0, 1, 1
+
+                    MDLabel:
+                        text: "Completion (%):"
+                        pos_hint: {"center_x": .5, "center_y": .5}
+                        halign: "center"
+                        theme_text_color: "Custom"
+                        text_color: 0, 0, 1, 1
+
+                    MDLabel:
+                        pos_hint: {"center_x": .5, "center_y": .5}
+                        text: "Signal-Noise-Ratio (SNR):"
+                        # size_hint_x: 1
+                        background_color : 0, 0, 1, 1
+                    
+                    MDLabel:
+                        pos_hint: {"center_x": .5, "center_y": .5}
+                        text: "Information Transfer Rate (ITR):"
+                        background_color : 0, 0, 1, 1  
+                
+                
+                BoxLayout:
+                    size_hint_y: 0.5
+                    orientation: 'horizontal'
+                    pos_hint: {'center_x': 0.5}
+                    # padding: dp(50)
+                    # spacing: dp(50)   
+
+                    AKCircularProgress:
+                        id: accuracy_progress
+                        # pos_hint: {"center_x": .5, "center_y": .5}
+                        # size_hint: None, None
+                        # size: dp(100), dp(100)
+                        percent_type: "percent"
+                        start_deg: 180
+                        end_deg: 540
+                    
+                    AKCircularProgress:
+                        id: completion_progress
+                        # pos_hint: {"center_x": .5, "center_y": .5}
+                        # size_hint: None, None
+                        # size: dp(100), dp(100)
+                        percent_type: "percent"
+                        start_deg: 180
+                        end_deg: 540
+                    
+                    AKCircularProgress:
+                        id: snr_value
+                        # pos_hint: {"center_x": .5, "center_y": .5}
+                        # size_hint: None, None
+                        # size: dp(100), dp(100)
+                        percent_type: "percent"
+                        start_deg: 240
+                        end_deg: 480
+                        percent_type: "relative"
+                        max_percent: 25
+                    
+                    AKCircularProgress:
+                        id: ITR_speed
+                        # pos_hint: {"center_x": .5, "center_y": .5}
+                        # size_hint: None, None
+                        # size: dp(100), dp(100)
+                        percent_type: "percent"
+                        start_deg: 240
+                        end_deg: 480
+                        percent_type: "relative"
+                        max_percent: 25
+            
+            BoxLayout:
+                size_hint_y: 0.1
+                orientation: 'vertical'
+                pos_hint: {'center_x': .5, 'center_y': .5}
+                # padding: dp(30) - Padding causes weird bug where game starts
+                AnchorLayout:
+                    anchor_x: 'center'
+                    anchor_y: 'bottom'
+                    
+                    MDRoundFlatButton:
+                        text: "Start"
+                        pos_hint: {'center_x': 0.5}
+                        text_color: 0, 0, 1, 1
+                        on_release: accuracy_progress.current_percent = 10 ; completion_progress.current_percent = 20
+                        on_release: ITR_speed.current_percent = 25
+
+<OfflineTraining>
+    AnchorLayout:
+        anchor_x: 'left'
+        anchor_y: 'center'
+        MDIconButton:
+            icon: "arrow-left-thick"
+            icon_size: "64sp"
+            on_release: 
+                root.manager.current = 'menu' 
+                root.manager.transition.direction = 'right'
+    BoxLayout:
+        size_hint: .8, .8
+        orientation: 'vertical'
+        pos_hint: {'center_x': .5, 'center_y': .5}
+        
+        BoxLayout:
+            size_hint_y: .5
+            orientation: 'vertical'
+            pos_hint: {'center_x': .5, 'center_y': .5}
+            Image:
+                id: gif
+                source: 'load_v2.gif'
+                center: self.parent.center
+                anim_delay: 0
+                mipmap: True
+                allow_stretch: True
+
+        
+        BoxLayout:
+            size_hint_y: .5
+            orientation: 'vertical'
+            pos_hint: {'center_x': .5, 'center_y': .5}
+            MDLabel:
+                halign: "center"
+                background_color : 0, 0, 0, 1
+                text: 'Starting Offline Session...'
+                # pos_hint: {'center_x': .5}
+                font_name: 'Roboto'
+                # font_size: 50
+                # padding: dp(50)
+
+<ApplicationScreen>:
+    AnchorLayout:
+        anchor_x: 'left'
+        anchor_y: 'center'
+        MDIconButton:
+            icon: "arrow-left-thick"
+            icon_size: "64sp"
+            on_release: 
+                root.manager.current = 'menu' 
+                root.manager.transition.direction = 'right'
+    FloatLayout:
+        size_hint: 1, 1
+        pos_hint: {'center_x': 0.5, 'center_y': .5}
+        canvas.before:
+            RoundedRectangle:
+                size: self.size
+                pos: self.pos
+                radius: [dp(10)]      
+        MDBoxLayout:
+            orientation: 'vertical'
+            adaptive_size: True
+            pos_hint: {"center_x": .5, "center_y": .5}
+            padding: dp(30)
+            spacing: dp(30)
+            
+            MyToggleButton:
+                pos_hint: {"center_x": .5, "center_y": .5}
+                text: "Emergency Alarm"
+                group: "x"
+                set_size: 1.4
+                #size_hint : .7,None
+                on_press: print("Alarm")
+                icon: "alarm-light"
+                set_size: "64sp"
+                font_size: "50sp"
+            
+            MyToggleButton:
+                pos_hint: {"center_x": .5, "center_y": .5}
+                text: "Communicate"
+                group: "x"
+                #size_hint : .7,None
+                on_press: print("Board")
+                icon: "scoreboard"
+                font_size: "50sp"
+            
+            MyToggleButton:
+                pos_hint: {"center_x": .5, "center_y": .5}
+                text: "Remote control"
+                group: "x"
+                #size_hint : .7,None
+                on_press: print("Control")
+                icon: "remote"
+                font_size: "50sp"
+
+        
+            
+
+
+
