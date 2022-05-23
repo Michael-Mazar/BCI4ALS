@@ -28,7 +28,14 @@ ALL_FEATURES = [];
 myPrediction = [];                                  % predictions vector
 decCount = 0;
 successCount = 0;
-onlineTrainingVec = prepareTraining(online_trails,MI1params.numClasses);    % vector with the conditions for each trial
+
+
+onlineTrainingVec = prepareTraining(online_trails,2);    % vector with the conditions for each trial
+onlineTrainingVec(onlineTrainingVec==1) = 3;
+
+
+
+
 numChans = size(EEG_chans,1);
 MI2params.offline = 0;
 MI2params.plot = 0;
@@ -199,8 +206,8 @@ for trial = 1:onlineNumTrials
     [MIFeatures] = feature_engineering(recordingFolder, MIData, bands, times, W, MI4params, feature_setting);
     FeaturesSelected = MIFeatures(:, SelectedIdx);
     ALL_FEATURES = [ALL_FEATURES FeaturesSelected]; % all data to save in the end of recordings
-    %myPrediction(decCount) = predict(FeaturesSelected);
-    myPrediction(decCount) = randi(3,1);
+    myPrediction(decCount) = predict(FeaturesSelected);
+    %myPrediction(decCount) = randi(3,1);
     cla
     if myPrediction(decCount) == currentClass
         successCount = successCount + 1;
@@ -220,10 +227,10 @@ end
 % finish recording
 save(strcat(recordingFolder, '\', 'online_trainingVec.mat'),'onlineTrainingVec');
 save(strcat(recordingFolder,'\', 'online_all_features.mat'),'ALL_FEATURES');
-text(0.5,0.6 , strcat(num2str(successCount),' trials succeed Out Of '...
+text(0.5,0.6 , strcat(num2str(successCount),' trials succeed Out Of  '...
         ,num2str(onlineNumTrials), ' trials'),...
         'HorizontalAlignment', 'Center', 'Color', 'white', 'FontSize', 40);
-text(0.5,0.2 , strcat('Precentage is ',...
+text(0.5,0.2 , strcat('Precentage is  ',...
     num2str(100*(successCount/onlineNumTrials)),'%'),...
     'HorizontalAlignment','Center', 'Color', 'white', 'FontSize', 40);
 pause(8);
