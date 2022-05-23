@@ -1,14 +1,16 @@
 %% Recording parameters
 numClasses = 3;
-numTrials = 25;
+numTrials = 20;
 trialLength = 5;  % remember to change times for bandpower!
-waitList = [3, 1, 1, 1]; % init, ready, cue, next
+waitList = [20, 1.5, 1.5, 1.5]; % init, ready, cue, next
 startMarker = 1111;
 markersList = [000, 99, startMarker, 9, 1001]; % startRec, endRec, startTrial, endTrial, baseline 
-lslPath = 'C:\Program Files\Toolboxes\liblsl-Matlab';
-eeglabPath = 'C:\Program Files\Toolboxes\eeglab2021.1';
-% rootRecordingPath = 'C:\Users\micha\MATLAB\Projects\BCI4ALS_PROJECT\Data\third_meeting_13_04';
-rootRecordingPath = recordingFolder;
+lslPath = 'C:\Users\Raz\BCI4ALS\liblsl-Matlab';
+eeglabPath = 'C:\Users\Raz\BCI4ALS\eeglab2021.1';
+pyEnvPath = 'C:\Users\Raz\GitRepos\BCI4ALS\pythonTest\venv\Scripts\python.exe';
+
+rootRecordingPath = 'C:\Users\Raz\BCI4ALS\Recordings';
+%rootRecordingPath = recordingFolder;
 trainingImages{1} = imread('square.png','png'); 
 trainingImages{2} = imread('arrow_left.png','png');
 trainingImages{3} = imread('arrow_right.png','png');
@@ -79,7 +81,7 @@ feature_setting = struct(...
     'Edge', true', ...
     'Entropy', true, ...
     'Slope', true, ...
-    'Intercept', false, ...
+    'Intercept', false, ... %why false? becuase online?
     'Mean_freq', true, ...
     'Obw', true, ...
     'Powerbw', true);
@@ -104,11 +106,11 @@ MI1params = struct('numTrials', numTrials, 'numClasses', numClasses, 'trialLengt
 % Parameters for M2
 MI2params = struct('highLim', highFilter, 'lowLim', lowFilter, 'notch', ...
     notchList, 'ICA_threshold', ICA_threshold, 'channelsNum', size(all_channels,2), ...
-    'offline',1);
+    'offline',1, 'plot', 1);
 
 % Parameters for M4
 MI4params = struct('select', how_many_features_to_select, 'test', ...
     how_many_test_for_class, 'FS', fs, 'vizTrial', vizTrial, 'z',...
     to_implement_zscore, 'f', frequency_vec, 'window', window, ...
-    'overlap', noverlap, 'n_features', n_features);
+    'overlap', noverlap, 'n_features', n_features, 'offline', 1);
 
