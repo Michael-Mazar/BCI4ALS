@@ -70,7 +70,7 @@ class Classifier():
         pred = self.model.predict(datapoint)
         return pred
 
-RECORDING_FOLDER = r'D:/HUJI/BCI/BCI4ALS/data/'
+RECORDING_FOLDER = r'/Users/osherm/Desktop/HUJI/BCI/BCI4ALS/data'
 
 if __name__ == '__main__':
 
@@ -111,7 +111,7 @@ if __name__ == '__main__':
         if datapoints.ndim == 1:
             datapoints = datapoints.reshape(1, -1)
         
-        prediciton = classifier.predict_class(datapoints)
+        prediction = classifier.predict_class(datapoints)
     
     else:
         print("Unsupported action: {}\nSupported actions are: 'train' and 'predict'".format(action))
