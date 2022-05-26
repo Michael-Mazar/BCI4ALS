@@ -178,6 +178,17 @@ GameWidget:
                 text_color: 0, 0, 0.8, 1
                 font_size: 25
             
+
+            MDFillRoundFlatIconButton:
+                text: "Prediction"
+                
+                line_color: 0, 1, 0, 1
+                pos_hint: {"center_x": .5, "center_y": .5}
+                size_hint : .7,None
+                on_press: 
+                    root.manager.current = 'prediction'
+                    root.manager.transition.direction = 'left'
+            
             MDFillRoundFlatIconButton:
                 text: "Applications"
                 icon: "apps"
@@ -467,6 +478,37 @@ GameWidget:
                 on_press: print("Control")
                 icon: "remote"
                 font_size: "50sp"
+
+<PredictionScreen>:
+    FloatLayout:
+        ScrollView:
+            pos_hint: {'left': 1, 'top': 1}
+            size_hint_y: .8
+            do_scroll_x: True
+            Label:
+                id: debugarea
+                size_hint: None, None
+                size: self.texture_size
+                color: [0, 0, 0, 1]
+        
+        BoxLayout:
+            Button:
+                size_hint_y: .1
+                text: 'Start'
+                id: start_stop_button
+                on_release:
+                    root.do_print()
+                    self.text = 'Stop' if root.is_printing else 'Start'
+
+            Button:
+                size_hint_y: .1
+                text: 'Back to main menu'
+                on_release:
+                    root.close_connection()
+                    root.ids["debugarea"].text = ''
+                    root.ids["start_stop_button"].text = 'Start'
+                    root.manager.current = 'menu'
+            
 
         
             
