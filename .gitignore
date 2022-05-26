@@ -6,3 +6,5 @@ BCI4ALS.code-workspace
 data/combined_all/EEG.fdt
 data/combined_all/EEG.set
 data/EEG.xdf
+pythonTest/venv/*
+*.asv
