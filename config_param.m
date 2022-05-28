@@ -1,5 +1,5 @@
 %% Recording parameters
-numClasses = 3;
+numClasses = 2;
 numTrials = 20;
 trialLength = 5;  % remember to change times for bandpower!
 waitList = [20, 1.5, 1.5, 1.5]; % init, ready, cue, next
@@ -7,8 +7,7 @@ startMarker = 1111;
 markersList = [000, 99, startMarker, 9, 1001]; % startRec, endRec, startTrial, endTrial, baseline 
 lslPath = 'C:\Users\Raz\BCI4ALS\liblsl-Matlab';
 eeglabPath = 'C:\Users\Raz\BCI4ALS\eeglab2021.1';
-pyEnvPath = 'C:\Users\Raz\GitRepos\BCI4ALS\pythonTest\venv\Scripts\python.exe';
-
+pyEnvPath = 'C:\Users\Raz\anaconda3\envs\BCI\python.exe';
 rootRecordingPath = 'C:\Users\Raz\BCI4ALS\Recordings';
 %rootRecordingPath = recordingFolder;
 trainingImages{1} = imread('square.png','png'); 

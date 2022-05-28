@@ -1,4 +1,3 @@
-%function MI_Online_Learning(recordingFolder)
 %% Refresh
 clc; clear; close all;
 %% Parameters
@@ -10,7 +9,11 @@ addpath(string(eeglabPath));
 eeglab nogui;
 % Setup Python interperter
 % TODO: consider adding Python interperter path to config_params
-pyenv('Version',string(pyEnvPath));
+try
+    pyenv('Version',string(pyEnvPath));
+catch
+    disp('Catched');
+end
 
 % Paradigm
 InitWait = waitList(1);             % before trials prep time
@@ -28,42 +31,14 @@ ALL_FEATURES = [];
 myPrediction = [];                                  % predictions vector
 decCount = 0;
 successCount = 0;
-
-
-onlineTrainingVec = prepareTraining(online_trails,2);    % vector with the conditions for each trial
+onlineTrainingVec = prepareTraining(online_trails,numClasses);    % vector with the conditions for each trial
 onlineTrainingVec(onlineTrainingVec==1) = 3;
-
-
-
-
 numChans = size(EEG_chans,1);
 MI2params.offline = 0;
 MI2params.plot = 0;
 MI4params.offline = 0;
-
-%{
-%their params:
-params.feedbackFlag = 1;            % 1-with feedback, 0-no feedback
-params.Fs = 125;                    % openBCI sample rate % Fs = 300;  % Wearable Sensing sample rate
-params.bufferLength = 5;            % how much data (in seconds) to buffer for each classification
-params.numVotes = 3;                % how many consecutive votes before classification?
-params.numConditions = 3;           % possible conditions - left/right/idle 
-params.leftImageName = 'arrow_left.jpeg';
-params.rightImageName = 'arrow_right.jpeg';
-params.squareImageName = 'square.jpeg';
-params.numTrials = 5;               % number of trials overall
-params.trialTime = 240;             % duration of each trial in seconds
-params.bufferPause = 0.2;           % pause before first pull.chunk
-params.startTrialMarker = 111;      % marker sent to command outlet to indicate start of trial
-params.commandLeft = -1;            % left command
-params.commandRight = 1;            % right command
-params.commandIdle = 0;             % idle command
-params.readyLength = 1.5;           % time (s) showing "Ready" on screen
-params.cueLength = 1;               % time (s) showing the cue before trial start
-params.endTrial = 999;              % marker sent to command outlet to indicate end of process
-iteration = 0;                                      % iteration counter
-motorData = [];                                     % post-laPlacian matrix
-%}
+%params.feedbackFlag = 1;            % 1-with feedback, 0-no feedback
+%params.numVotes = 3;                % how many consecutive votes before classification?
 
 %% Recording location
 % Define recording folder location and create the folder:
@@ -79,7 +54,6 @@ todayFolder = strcat(subFolder, '\', string(dt));
 if not(isfolder(todayFolder))
     mkdir(todayFolder);
 end
-
 recordingFolder = strcat(todayFolder, '\Online');
 mkdir(recordingFolder);
 
@@ -98,15 +72,6 @@ while isempty(result)
 end
 disp('Success resolving!');
 EEG_Inlet = lsl_inlet(result{1});
-
-
-%% Start connection to python
-% HOST = 'localhost';
-% PORT = 50007;
-% disp('Connecting to python script!');
-% t = tcpclient(HOST, PORT);
-% disp('Connected to Python GUI');
-% TODO: consider sending the cue vector to the GUI
 
 %% Screen Setup 
 monitorPos = get(0,'MonitorPositions'); % monitor position and number of monitors
@@ -146,10 +111,13 @@ for ii = 1:length(axClasses)
 end
 axes(hAx)
 
-
-
 %% This is the main online script
 onlineNumTrials = length(onlineTrainingVec);
+text(0.5,0.5 ,...                               % important for people to prepare
+    ['System is calibrating.' newline 'The training session will begin shortly.'], ...
+    'HorizontalAlignment', 'Center', 'Color', 'white', 'FontSize', 40);
+pause(InitWait)
+cla
 for trial = 1:onlineNumTrials
     currentClass = onlineTrainingVec(trial);
     % next cue
@@ -176,9 +144,6 @@ for trial = 1:onlineNumTrials
     
     trialStart = tic;
     buffer = [];
-    % In their code the repeat same class X times (one by one) - if we
-    % want to do this we need to change this while loop (to toc(trialStart)
-    % < feedback_returns*trialLength) and insert below&above code
     while size(buffer,2) <= trialLength*fs
         cur_data = EEG_Inlet.pull_chunk();
         pause(0.1);
@@ -207,14 +172,13 @@ for trial = 1:onlineNumTrials
     FeaturesSelected = MIFeatures(:, SelectedIdx);
     ALL_FEATURES = [ALL_FEATURES FeaturesSelected]; % all data to save in the end of recordings
     myPrediction(decCount) = predict(FeaturesSelected);
-    %myPrediction(decCount) = randi(3,1);
     cla
     if myPrediction(decCount) == currentClass
         successCount = successCount + 1;
         text(0.5,0.65 , 'Prediction was right!',...
             'HorizontalAlignment', 'Center', 'Color', 'white', 'FontSize', 40);
     else
-        text(0.5,0.65 , 'Prediction was wrong :(',...
+        text(0.5,0.65 , 'Prediction was wrong',...
             'HorizontalAlignment', 'Center', 'Color', 'white', 'FontSize', 40);
     end
     image(flip(trainingImages{myPrediction(decCount)}, 1), 'XData', [0.25, 0.75],...
@@ -222,16 +186,14 @@ for trial = 1:onlineNumTrials
     size(trainingImages{myPrediction(decCount)},1)./ size(trainingImages{myPrediction(decCount)},2)])
     pause(4);
     cla
-    %%% TODO: add co-adaptive after X trials
+    % TODO: add co-adaptive after X trials
 end
 % finish recording
 save(strcat(recordingFolder, '\', 'online_trainingVec.mat'),'onlineTrainingVec');
 save(strcat(recordingFolder,'\', 'online_all_features.mat'),'ALL_FEATURES');
-text(0.5,0.6 , strcat(num2str(successCount),' trials succeed Out Of  '...
-        ,num2str(onlineNumTrials), ' trials'),...
-        'HorizontalAlignment', 'Center', 'Color', 'white', 'FontSize', 40);
-text(0.5,0.2 , strcat('Precentage is  ',...
-    num2str(100*(successCount/onlineNumTrials)),'%'),...
-    'HorizontalAlignment','Center', 'Color', 'white', 'FontSize', 40);
+text(0.5,0.5 ,...                               % important for people to prepare
+    [num2str(successCount) ' trials succeed out of' ' ' num2str(onlineNumTrials) ' ' 'trials'...
+    newline 'Precentage is' ' ' num2str(100*(successCount/onlineNumTrials)) '%'], ...
+    'HorizontalAlignment', 'Center', 'Color', 'white', 'FontSize', 40);
 pause(8);
 disp('Finished')
