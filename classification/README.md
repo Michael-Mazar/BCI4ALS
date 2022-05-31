@@ -17,14 +17,15 @@ https://www.mathworks.com/help/matlab/ref/pyrunfile.html
 
 
 # Train
-pyrunfile("Classifier.py", action="train")
+pyrunfile("train.py")
 
 # Predict
-load(strcat(recordingFolder, '\FeaturesTrainSelected.mat'))
+load(strcat(recordingFolder, '\FeaturesTrainSelected.mat'));
 or
-load(strcat(recordingFolder, '\FeaturesTrainSelected.mat'))
+load(strcat(recordingFolder, '\FeaturesTrainSelected.mat'));
 
-prediction = pyrunfile("Classifier.py", "prediciton", action="predict", datapoints=FeaturesTest);
+prediction = pyrunfile("predict.py", "prediciton", datapoints=FeaturesTest);
+
 # Convert to a Matlab object
 prediction = uint8(double(prediction))
 
