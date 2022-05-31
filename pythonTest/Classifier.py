@@ -113,7 +113,7 @@ if __name__ == '__main__':
         if datapoints.ndim == 1:
             datapoints = datapoints.reshape(1, -1)
         
-        prediciton = classifier.predict_class(datapoints)
+        prediction = classifier.predict_class(datapoints)
     
     else:
         print("Unsupported action: {}\nSupported actions are: 'train' and 'predict'".format(action))
