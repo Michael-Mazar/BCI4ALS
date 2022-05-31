@@ -146,5 +146,7 @@ end
 MIFeatures = reshape(MIFeaturesLabel,trials,[]);
 MIFeatures = [CSPFeatures MIFeatures];              % add the CSP features to the overall matrix
 AllDataInFeatures = MIFeatures;
-save(strcat(recordingFolder,'\AllDataInFeatures.mat'),'AllDataInFeatures');
+if params.offline == 1
+    save(strcat(recordingFolder,'\AllDataInFeatures.mat'),'AllDataInFeatures');
+end
 end

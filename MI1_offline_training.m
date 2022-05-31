@@ -27,6 +27,7 @@ Baseline = params.markers(5);
 
 % Training Vector
 trainingVec = prepareTraining(numTrials,numClasses);    % vector with the conditions for each trial
+trainingVec(trainingVec==1) = 3;
 %% Recording location
 % Define recording folder location and create the folder:
 subID = input('Please enter subject ID/Name: ');    % prompt to enter subject ID or name

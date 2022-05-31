@@ -1,9 +1,13 @@
-function [EEG_Arr] = preprocess(EEG, recordingFolder, eeglab_dir, unused_channels, unwanted_channels, params) 
+function [EEG_Arr] = preprocess(EEG, recordingFolder, eeglab_dir, unused_channels, params) 
 %% Preprocessing
 % a b c ??
 %% Some parameters (this needs to change according to your system):
 addpath(string(eeglab_dir));
-eeglab;                                     % open EEGLAB 
+if params.plot == 1
+    eeglab;                                     % open EEGLAB 
+else
+    eeglab nogui;
+end
 highLim = params.highLim;                               % filter data under 40 Hz
 lowLim = params.lowLim;                               % filter data above 0.5 Hz
 % montage_ulracotext_path = 'montage_ultracortex.ced';
@@ -24,13 +28,13 @@ originalEEG = EEG;
 originalEEG.data = EEG.data;
 
 %% (2) Low Pass Filter 
-EEG = pop_eegfiltnew(EEG, 'hicutoff',highLim,'plotfreqz',1);    % remove data above
+EEG = pop_eegfiltnew(EEG, 'hicutoff',highLim,'plotfreqz',params.plot);    % remove data above
 EEG = eeg_checkset( EEG );
 EEG_afterHigh = EEG;
 EEG_afterHigh.data = EEG.data; % Return highpass
 
 %% (3) High-pass filter
-EEG = pop_eegfiltnew(EEG, 'locutoff',lowLim,'plotfreqz',1);     % remove data under
+EEG = pop_eegfiltnew(EEG, 'locutoff',lowLim,'plotfreqz',params.plot);     % remove data under
 EEG = eeg_checkset( EEG );
 % Save after high pass
 EEG_afterLow = EEG;
@@ -49,12 +53,14 @@ EEG_afterBandPass = EEG;
 EEG_afterBandPass.data = EEG.data;
 
 %% (5) ASR Processing - Clean EEG Data with Clean_raw automatic artifact rejection
-EEG = clean_artifacts(EEG,'WindowCriterion','off','ChannelCriterion','off','LineNoiseCriterion','off');
+%EEG = clean_artifacts(EEG,'WindowCriterion','off','ChannelCriterion','off','LineNoiseCriterion','off');
 EEG = eeg_checkset( EEG );
 EEG_AfterAR = EEG;
 % EEG_AfterAR.data = EEG.data;
-% vis_artifacts(EEG_AfterAR,EEG_AfterLap);
-pause;
+% if params.plot == 1
+%     vis_artifacts(EEG_AfterAR,EEG_AfterLap);
+%     pause;
+% end
 
 %% (6) Laplacian filter
 % C03_ind = 1;
@@ -90,9 +96,11 @@ EEG_AfterChannelRemoval = EEG;
 % EEG = clean_ica_components(EEG, params.ICA_threshold);
 % EEG = eeg_checkset( EEG );
 EEG_AfterICA = EEG;
-vis_artifacts(EEG_AfterICA,EEG_AfterAR);
-disp('Review changes after ICA..')
-pause;
+if params.plot == 1
+    vis_artifacts(EEG_AfterICA,EEG_AfterAR);
+    disp('Review changes after ICA..')
+    pause;
+end
 
 EEG_Arr = [originalEEG, EEG_afterHigh, EEG_afterLow, EEG_afterBandPass, EEG_AfterAR, EEG_AfterLap, EEG_AfterChannelRemoval, EEG_AfterICA];
 % Save the data into .mat variables on the computer

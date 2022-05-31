@@ -13,7 +13,7 @@ from sklearn import metrics
 import pickle
 
 class Classifier():
-    def __init__(self, recordings_folder, model_file_path="model"):
+    def __init__(self, recordings_folder, model_file_path="pythonTest/model"):
         self.recordings_folder = recordings_folder
         self.model_file_path = model_file_path
         self.model = None
