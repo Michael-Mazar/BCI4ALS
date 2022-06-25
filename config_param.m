@@ -45,30 +45,30 @@ end
 
 % class 1 is idle, 2 is left and 3 is right - for any change still need to
 % change manually MI4 (lines 70-71 and 229-231
-notchList = [50];  % check if also need 25!
+notchList = [50,25];  % check if also need 25!
 highFilter = 40; % Was 50
 lowFilter = 0.5; % Was 0.5
 ICA_threshold = 1;
 fs = 125; % openBCI sample rate
 %% Feature extraction parameters
 to_implement_zscore = 1; % 1 is true, otherwise false
-how_many_features_to_select = 10;
-how_many_test_for_class = 10;
+how_many_features_to_select = 10; % Was 10
+how_many_test_for_class = 5;
 vizTrial = 5; % what is this?
 frequency_vec = 0.5:1:60;         % frequency vector - lowest:jump:highst
 window = 40;                      % sample size window for pwelch
 noverlap = 20;                    % number of sample overlaps for pwelch
 
 % change bands and times according to graphs (spectogram, ?)
-bands{1} = [5,10];
-bands{2} = [7,15];
-bands{3} = [15.5,20];
+bands{1} = [2,10];
+bands{2} = [2,10];
+bands{3} = [2,10];
 % bands{4} = [17.5,20.5];
 % bands{5} = [20.5,22];
 % Make sure times in the trial length range!
-times{1} = (2*fs : 4*fs);
-times{2} = (0.5*fs : 2*fs);
-times{3} = (2*fs : 4*fs);
+times{1} = (0.3*fs : 1*fs);
+times{2} = (1.7*fs : 2.4*fs);
+times{3} = (2.7*fs : 3.7*fs);
 % times{4} = (1*fs : 1.75*fs);
 % times{5} = (1.75*fs : 2.25*fs);
 %% Define which features to select:
@@ -104,7 +104,7 @@ MI1params = struct('numTrials', numTrials, 'numClasses', numClasses, 'trialLengt
 % Parameters for M2
 MI2params = struct('highLim', highFilter, 'lowLim', lowFilter, 'notch', ...
     notchList, 'ICA_threshold', ICA_threshold, 'channelsNum', size(all_channels,2), ...
-    'offline',1);
+    'offline',1,'ASR',1,'Laplace',1,'ICA',0);
 
 % Parameters for M4
 MI4params = struct('select', how_many_features_to_select, 'test', ...
