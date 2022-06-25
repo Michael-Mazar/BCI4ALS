@@ -1,19 +1,11 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-
 import scipy.io
 import numpy as np
 import os
 
-# from lazypredict.Supervised import LazyClassifier
-from sklearn.model_selection import train_test_split
-from sklearn import svm
-from sklearn import metrics
 import pickle
 
 class Classifier():
-    def __init__(self, recordings_folder, model_file_path="pythonTest/model"):
+    def __init__(self, recordings_folder, model_file_path="model"):
         self.recordings_folder = recordings_folder
         self.model_file_path = model_file_path
         self.model = None
@@ -72,51 +64,8 @@ class Classifier():
         pred = self.model.predict(datapoint)
         return pred
 
-RECORDING_FOLDER = r'D:/HUJI/BCI/BCI4ALS/data/'
 
-if __name__ == '__main__':
 
-    classifier = Classifier(recordings_folder=RECORDING_FOLDER)
-
-    if action == "train":
-        X_file = r'AllDataInFeatures'
-        y_file = r'trainingVec'
-        # X, y = classifier.read_dataset(X_file, y_file) # make sure dim are right
-        
-        X_train, y_train, X_test, y_test = classifier.read_train_test_data()
-
-        ### Split training data to training and validation
-        # X_train, X_validation, y_train, y_validation = train_test_split(X_train, y_train.T, test_size=.2, random_state=42)
-        
-        ### fit all models
-        # clf = LazyClassifier(predictions=True)
-        # models, predictions = clf.fit(X_train, X_test, y_train, y_test)
-        # print(models.iloc[:,:4])
-        
-        clf = svm.SVC(kernel='linear') 
-        clf.fit(X_train, y_train.T)
-        
-        # y_validation_predicted = clf.predict(X_validation)
-        # print("Validation accuracy:",metrics.accuracy_score(y_validation, y_validation_predicted))
-        
-        y_test_predicted = clf.predict(X_test) 
-        print("Test accuracy:",metrics.accuracy_score(y_test.T, y_test_predicted))
-
-        classifier.save_model(clf)
-
-        result = "Success"
-    
-    elif action == "predict":
-        classifier.load_model()
-        datapoints = np.array(datapoints)
-
-        if datapoints.ndim == 1:
-            datapoints = datapoints.reshape(1, -1)
-        
-        prediction = classifier.predict_class(datapoints)
-    
-    else:
-        print("Unsupported action: {}\nSupported actions are: 'train' and 'predict'".format(action))
 
 
 
