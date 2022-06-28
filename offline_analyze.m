@@ -5,7 +5,7 @@
 %% Refresh
 clc; clear all; close all;
 %% Load parameters from config
-recordingFolder = 'C:\Users\micha\MATLAB\Projects\BCI4ALS_PROJECT\Data\18';
+recordingFolder = 'C:\Users\micha\MATLAB\Projects\BCI4ALS_PROJECT\Data\7';
 config_param
 %% Run MI2:
 % for manually running - load to the workspace the relevant recordingFolder
@@ -28,13 +28,18 @@ disp('Finished pre-processing pipeline. Press any key to continue...');
 pause;
 %% Visualize & Analyze preprocessed data:
 % Review the recording
-selected_dataset = 8; % Review dataset 
+
 [gEEG, EEG_class_arr] = f_ExtractEpochedData(EEG_Arr, selected_dataset, 0);
 f_Visualize_EEG(EEG_class_arr, recordingFolder, EEG_chans, gEEG); % Visualize base characteritics
-s_EEG = EEG_Arr(selected_dataset);
-pop_eegplot(s_EEG)
+
+
 disp('Review recording data. Press any key to continue...');
 pause; close all;
+
+%%
+selected_dataset = 8; % Review dataset 
+s_EEG = EEG_Arr(selected_dataset);
+pop_eegplot(s_EEG)
 
 %% Run MI3 (create MIData)
 % Plaster solution instead of size(EEG_chans,1)
