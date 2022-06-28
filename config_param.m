@@ -1,6 +1,6 @@
 %% Recording parameters
-numClasses = 2;
-numTrials = 20;
+numClasses = 3;
+numTrials = 3;
 trialLength = 5;  % remember to change times for bandpower!
 waitList = [20, 1.5, 1.5, 1.5]; % init, ready, cue, next
 startMarker = 1111;

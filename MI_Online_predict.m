@@ -4,11 +4,11 @@ clc; clear; close all;
 %% Parameters
 recordingFolder = 'C:\Users\Raz\BCI4ALS\Recordings\ONLINE_TEST';
 config_param 
-dataFolder = 'C:\Users\Raz\GitRepos\BCI4ALS\data\combined';
+dataFolder = 'C:\Users\Raz\GitRepos\BCI4ALS\Data\michael';
 addpath(string(lslPath));     % lab streaming layer library
 addpath(string(lslPath) + '\bin'); % lab streaming layer bin
 addpath(string(eeglabPath)); 
-eeglab nogui;
+eeglab;
 
 % Setup Python interperter
 % TODO: consider adding Python interperter path to config_params

@@ -3,10 +3,8 @@ function [EEG_Arr] = preprocess(EEG, recordingFolder, eeglab_dir, unused_channel
 % a b c ??
 %% Some parameters (this needs to change according to your system):
 addpath(string(eeglab_dir));
-if params.plot == 1
-    eeglab;                                     % open EEGLAB 
-else
-    eeglab nogui;
+if params.offline == 1
+    eeglab; 
 end
 highLim = params.highLim;                               % filter data under 40 Hz
 lowLim = params.lowLim;                               % filter data above 0.5 Hz

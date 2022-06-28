@@ -5,10 +5,11 @@
 %% Refresh
 clc; clear all; close all;
 %%
-recordingFolder = 'C:\Users\micha\MATLAB\Projects\BCI4ALS_PROJECT\Data\combined';                          % Define destination folder for saving new trainingVec
+recordingFolder = 'C:\Users\Raz\GitRepos\BCI4ALS\Data\combined';                          % Define destination folder for saving new trainingVec
 config_param                                                        % Run and extract the parameters
-dataset = [7:8,12,14,16];                                                    % Define which datasets to combine (What each number means is in excel)
-folder = 'C:\Users\micha\MATLAB\Projects\BCI4ALS_PROJECT\Data';     % Define target folder which contains all hana's recordings
+%dataset = [7:8,12,14,16];                                                    % Define which datasets to combine (What each number means is in excel)
+dataset = [7:8,12,14,16,22:24];
+folder = 'C:\Users\Raz\GitRepos\BCI4ALS\Data';     % Define target folder which contains all hana's recordings
 [MIData, trainingVec] = f_combineDataset(dataset, folder);          % Combine MIData
 %% Run MI4 (Extract features and labels)
 MI4_featureExtraction(recordingFolder, MIData, EEG_chans, trainingVec, bands, times, feature_headers, MI4params, feature_setting);

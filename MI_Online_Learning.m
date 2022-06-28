@@ -2,17 +2,17 @@
 clc; clear; close all;
 %% Parameters
 config_param
-dataFolder = 'C:\Users\Raz\GitRepos\BCI4ALS\data\combined';
+dataFolder = 'C:\Users\Raz\GitRepos\BCI4ALS\Data\michael';
 addpath(string(lslPath));     % lab streaming layer library
 addpath(string(lslPath) + '\bin'); % lab streaming layer bin
 addpath(string(eeglabPath)); 
-eeglab nogui;
-% Setup Python interperter
+eeglab;
+% Setup Python int1erperter
 % TODO: consider adding Python interperter path to config_params
 try
     pyenv('Version',string(pyEnvPath));
-catch
-    disp('Catched');
+catch e
+    disp(e);
 end
 
 % Paradigm
@@ -36,7 +36,7 @@ onlineTrainingVecAllClasses = prepareTraining(online_trails,MI1params.numClasses
 % Keep only relevant classes for online prediciton (e.g., Left and Right)
 % IDLE = 1, LEFT = 2, RIGHT = 3
 predictionClasses = [2, 3];
-trainingVectorIndices = find(ismember(onlineTrainingVecAllClasses, predictionClasses));
+predictionClassesIndices = find(ismember(onlineTrainingVecAllClasses, predictionClasses));
 onlineTrainingVec = onlineTrainingVecAllClasses(predictionClassesIndices);
 
 numChans = size(EEG_chans,1);
@@ -190,7 +190,7 @@ for trial = 1:onlineNumTrials
     image(flip(trainingImages{myPrediction(decCount)}, 1), 'XData', [0.25, 0.75],...
     'YData', [0.05, 0.55 * ...
     size(trainingImages{myPrediction(decCount)},1)./ size(trainingImages{myPrediction(decCount)},2)])
-    pause(4);
+    pause(7);
     cla
     % TODO: add co-adaptive after X trials
 end
