@@ -1,7 +1,6 @@
-%% Running requirements
-% Requirements: 
-% To run this script make sure you are in the BCI4ALS folder and cloned the
-% michael_version repository from github
+
+% TODO: add description
+
 %% Refresh
 clc; clear all; close all;
 %%

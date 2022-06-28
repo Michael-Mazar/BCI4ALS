@@ -8,3 +8,4 @@ data/combined_all/EEG.set
 data/EEG.xdf
 classification/venv/*
 *.asv
+.DS_Store

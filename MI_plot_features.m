@@ -1,4 +1,6 @@
 function MI_plot_features(recordingFolder, feature_setting, EEG_chans)
+
+% TODO: Michael (?) - is this function used? I don't see any references to it
 %% Function description:
 %% Extract all relevant variables
 FeaturesWeights = struct2cell(load(strcat(recordingFolder,'\FeatureWeights.mat')));

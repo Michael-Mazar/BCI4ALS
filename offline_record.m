@@ -1,9 +1,5 @@
-%% MI Offline Main Script
-% This code is part of the BCI-4-ALS Course written by Asaf Harel
-% (harelasa@post.bgu.ac.il) in 2021. You are free to use, change, adapt and
-% so on - but please cite properly if published.
-% Established a pipeline that can be run from start to finish to gauge
-% %precentage
+% TODO: add description
+
 %% Refresh
 clc; clear; close all;
 
