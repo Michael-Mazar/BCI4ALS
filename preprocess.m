@@ -1,10 +1,13 @@
 function [EEG_Arr] = preprocess(EEG, recordingFolder, eeglab_dir, unused_channels, params) 
 %% Preprocessing
-% a b c ??
 %% Some parameters (this needs to change according to your system):
 addpath(string(eeglab_dir));
-if params.offline == 1
-    eeglab; 
+
+if params.plot == 1
+    eeglab;                                     % open EEGLAB 
+else
+    eeglab nogui;
+
 end
 highLim = params.highLim;                               % filter data under 40 Hz
 lowLim = params.lowLim;                               % filter data above 0.5 Hz
@@ -40,9 +43,6 @@ EEG_afterLow.data = EEG.data;
 
 %% (4) Notch filter - this uses the ERPLAB filter
 % *Increases the processing time??
-% for x = params.notch
-%     EEG  = pop_basicfilter(EEG,  1:params.channelsNum , 'Boundary', 'boundary', 'Cutoff', x, 'Design', 'notch', 'Filter', 'PMnotch', 'Order',  180 );
-% end
 EEG  = pop_basicfilter(EEG,  1:params.channelsNum , 'Boundary', 'boundary', 'Cutoff', 25, 'Design', 'notch', 'Filter', 'PMnotch', 'Order',  100 );
 EEG  = pop_basicfilter(EEG,  1:params.channelsNum , 'Boundary', 'boundary', 'Cutoff', 50, 'Design', 'notch', 'Filter', 'PMnotch', 'Order',  180 );
 EEG = eeg_checkset( EEG );
@@ -51,24 +51,36 @@ EEG_afterBandPass = EEG;
 EEG_afterBandPass.data = EEG.data;
 
 %% (5) ASR Processing - Clean EEG Data with Clean_raw automatic artifact rejection
-%EEG = clean_artifacts(EEG,'WindowCriterion','off','ChannelCriterion','off','LineNoiseCriterion','off');
-EEG = eeg_checkset( EEG );
-EEG_AfterAR = EEG;
-% EEG_AfterAR.data = EEG.data;
-% if params.plot == 1
-%     vis_artifacts(EEG_AfterAR,EEG_AfterLap);
+if params.ASR
+    EEG = clean_artifacts(EEG,'WindowCriterion','off','LineNoiseCriterion','off','ChannelCriterion','off');
+    EEG = eeg_checkset( EEG );
+%     vis_artifacts(EEG,EEG_afterBandPass);
 %     pause;
-% end
+else 
+    disp('Skipping ASR Preprocessing....')
+end
+
+EEG_AfterAR = EEG;
+
+if params.plot == 1
+  EEG_AfterAR.data = EEG.data;
+  vis_artifacts(EEG_AfterAR,EEG_AfterLap);
+  pause;
+end
 
 %% (6) Laplacian filter
-% C03_ind = 1;
-% C03_neighbors_ind = [4,6,8,10];
-% C04_ind = 2;
-% C04_neighbors_ind = [5,7,9,11];
-% EEG_afterLapC_3 = laplacian_1d_filter(EEG.data, C03_ind, C03_neighbors_ind);
-% EEG.data = EEG_afterLapC_3;
-% EEG_afterLap_C4 = laplacian_1d_filter(EEG.data, C04_ind, C04_neighbors_ind);
-% EEG.data = EEG_afterLap_C4;
+if params.Laplace
+    C03_ind = 1;
+    C03_neighbors_ind = [4,6,8,10];
+    C04_ind = 2;
+    C04_neighbors_ind = [5,7,9,11];
+    EEG_afterLapC_3 = laplacian_1d_filter(EEG.data, C03_ind, C03_neighbors_ind);
+    EEG.data = EEG_afterLapC_3;
+    EEG_afterLap_C4 = laplacian_1d_filter(EEG.data, C04_ind, C04_neighbors_ind);
+    EEG.data = EEG_afterLap_C4;
+else
+    disp('Skipping Laplacian integration')
+end
 % Save Laplacian Structure
 EEG = eeg_checkset( EEG );
 EEG_AfterLap = EEG;
@@ -89,17 +101,26 @@ EEG_AfterChannelRemoval = EEG;
 % Manual - May require editing functions/sigprocfunc/icadefs.m under EEGLAB
 % folder by adding EEGOPTION_PATH = userpath (See Makoto Processing line)
 % because ICAACT is empty
-% Manual? - Insert for manual here
-% Automatic
-% EEG = clean_ica_components(EEG, params.ICA_threshold);
-% EEG = eeg_checkset( EEG );
-EEG_AfterICA = EEG;
-if params.plot == 1
-    vis_artifacts(EEG_AfterICA,EEG_AfterAR);
-    disp('Review changes after ICA..')
-    pause;
-end
 
+if params.ICA
+    EEG = clean_ica_components(EEG, params.ICA_threshold);
+    EEG = eeg_checkset( EEG );
+    EEG_AfterICA = EEG;
+    
+    if params.plot == 1
+      vis_artifacts(EEG_AfterICA,EEG_AfterAR);
+      disp('Review changes after ICA..')
+      pause;
+    end
+else
+    disp('Skipping ICA Preprocessing..')
+
+% EEG might not have changed here if params.ICA==false
+EEG_AfterICA = EEG;
+
+
+
+%% Save all the data
 EEG_Arr = [originalEEG, EEG_afterHigh, EEG_afterLow, EEG_afterBandPass, EEG_AfterAR, EEG_AfterLap, EEG_AfterChannelRemoval, EEG_AfterICA];
 % Save the data into .mat variables on the computer
 EEG_data = EEG.data;            % Pre-processed EEG data

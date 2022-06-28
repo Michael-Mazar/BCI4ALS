@@ -11,6 +11,7 @@ datasetsFolder = 'C:\Users\Raz\GitRepos\BCI4ALS\Data';     % Define target folde
 [MIData, trainingVec] = f_combineDataset(dataset, folder);          % Combine MIData
 datasets_to_plot = [1:3];
 MI_plot_basics(recordingFolder, MIData, datasets_to_plot, trainingVec, EEG_chans, MI4params) 
+
 %% Run MI4 (Extract features and labels)
 MI4params.z = 1;
 MI4_featureExtraction_new(recordingFolder, MIData, EEG_chans, trainingVec, bands, times, feature_headers, MI4params, feature_setting);

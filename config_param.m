@@ -49,10 +49,12 @@ end
 %unused_channels = {'T8','PO3','PO4'}; % For 13 channels headset
 
 % class 1 is idle, 2 is left and 3 is right - for any change still need to
+
 % change manually MI4 
 notchList = [50,25];  
 highFilter = 40; % Originally was 50
 lowFilter = 0.5; 
+
 ICA_threshold = 1;
 fs = 125; % openBCI sample rate - can also be extracted from the EEG object of the recordings
 %% Feature extraction parameters
@@ -63,6 +65,7 @@ vizTrial = 5; % what is this?
 frequency_vec = 0.5:1:60;         % frequency vector - lowest:jump:highst
 window = 40;                      % sample size window for pwelch
 noverlap = 20;                    % number of sample overlaps for pwelch
+
 
 % change frequency bands and times according to graphs (spectogram, ?)
 bands{1} = [2,10];
