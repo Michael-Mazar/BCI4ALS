@@ -26,16 +26,8 @@ endTrial = params.markers(4);
 Baseline = params.markers(5);
 
 % Training Vector
-% trainingVec = prepareTraining(numTrials,numClasses);    % vector with the conditions for each trial
-% trainingVec(trainingVec==1) = 3;
-
-offlineTrainingVecAllClasses = prepareTraining(numTrials,numClasses);    % vector with the conditions for each trial
-% Keep only relevant classes for offline training (e.g., Left and Right)
-% IDLE = 1, LEFT = 2, RIGHT = 3
-trainingClasses = [2, 3];
-trainingClassesIndices = find(ismember(offlineTrainingVecAllClasses, trainingClasses));
-trainingVec = offlineTrainingVecAllClasses(trainingClassesIndices);
-
+trainingVec = prepareTraining(numTrials,numClasses);    % vector with the conditions for each trial
+trainingVec(trainingVec==1) = 3;
 %% Recording location
 % Define recording folder location and create the folder:
 subID = input('Please enter subject ID/Name: ');    % prompt to enter subject ID or name
@@ -51,10 +43,7 @@ if not(isfolder(todayFolder))
     mkdir(todayFolder);
 end
 recordingFolder = todayFolder;
-% recordingFolder = strcat(todayFolder, string(params.count), '\');
-% if not(isfolder(recordingFolder))
-%     mkdir(recordingFolder);
-% end
+
 %% open stream
 disp('Loading the Lab Streaming Layer library...');
 lib = lsl_loadlib();                    % load the LSL library
@@ -119,7 +108,7 @@ cla
 for trial = 1:totalTrials
     outletStream.push_sample(startTrial);       % trial trigger & counter
 %     startTrial = startTrial + trial;    
-    currentClass = trainingVec(trial);          % What class is it?
+    currentClass = trainingVec(trial);  
     
     % Cue before ready
         text(0.5,0.5 , 'coming next ',...
