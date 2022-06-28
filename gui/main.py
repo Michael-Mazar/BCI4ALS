@@ -1,12 +1,8 @@
-#!/usr/bin/env python
-# coding: utf-8
-
 import os
 import sys
 from typing import Dict
 os.path.dirname(sys.executable)
 
-# from tkinter import Label
 from kivymd.app import MDApp
 from kivy.clock import Clock
 from kivy.uix.screenmanager import ScreenManager, Screen
@@ -18,7 +14,6 @@ from kivymd.uix.behaviors.toggle_behavior import MDToggleButton
 from kivy.properties import NumericProperty, ReferenceListProperty, ObjectProperty
 from kivy.uix.image import Image
 from kivy.uix.floatlayout import FloatLayout
-# Import game;
 from game import *
 
 # Client-related imports
@@ -38,11 +33,12 @@ class ApplicationScreen(Screen):
 
 
 class PredictionScreen(Screen):
-    def __init__(self, class_to_results: Dict[int, str], images_base_path: str, **kwargs):
+    def __init__(self, class_to_result: Dict[int, str], images_base_path: str, **kwargs):
         super(PredictionScreen,self).__init__(**kwargs)
 
         self.client = Client()
         
+        self.class_to_result = class_to_result
         self.images_paths = self._create_images_paths(images_base_path)
         self.ids["prediction_image"].source = self.images_paths["start"]
         
@@ -63,11 +59,11 @@ class PredictionScreen(Screen):
     def predict(self):
         self.client.connect()
         # TODO: consider adding a "waiting" image while waiting for results.
-        # We should probably use a different thread/Future to wait for the prediction result, so the GUI won't be stuck
+        # We should probably use a different thread/Future to wait for the prediction result, so the GUI won't "hang"
         
         prediction_raw = self.client.get_prediction_data()
         print("Matalb result: {}".format(prediction_raw))
-        result_name = CLASS_TO_RESULT[prediction_raw]
+        result_name = self.class_to_result[prediction_raw]
         print("Result name: {}".format(result_name))
 
         prediction_img_path = self.images_paths[result_name]
@@ -118,16 +114,15 @@ class MIMainApp(MDApp):
         sm.add_widget(ProgressWidget(name='progress_widget'))
         sm.add_widget(OfflineTraining(name='offline'))
         sm.add_widget(ApplicationScreen(name='application'))
-        # TODO: remove PredictionScreen later
-        sm.add_widget(PredictionScreen(class_to_results=self.class_to_result, images_base_path=self.images_base_path, name='prediction'))
+        sm.add_widget(PredictionScreen(class_to_result=self.class_to_result, images_base_path=self.images_base_path, name='prediction'))
 
         self.root_widget = sm
 
         return sm
 
 
-#TODO: change according to used classes
-CLASS_TO_RESULT = {2: "yes", 3: "no"}
+# Change this mapping according to used classes
+CLASS_TO_RESULT = {3: "yes", 2: "no"}
 import os.path
 current_file_path = os.path.abspath(os.path.dirname(__file__))
 IMAGES_BASE_PATH = os.path.join(current_file_path, "images")

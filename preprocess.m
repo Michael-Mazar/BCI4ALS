@@ -7,6 +7,7 @@ if params.plot == 1
     eeglab;                                     % open EEGLAB 
 else
     eeglab nogui;
+
 end
 highLim = params.highLim;                               % filter data under 40 Hz
 lowLim = params.lowLim;                               % filter data above 0.5 Hz

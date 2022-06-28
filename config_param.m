@@ -23,12 +23,16 @@ end
 %% Preprocessing parameters
 unused_channels = {'T8','PO3','PO4','O2','O1'}; % For 11 channels headset
 all_channels = {'C03','C04','C0Z','FC1','FC2','FC5','FC6','CP1','CP2','CP5','CP6'};
-% unwanted_channels = {'FC1','FC2','FC5','FC6','CP1','CP2','CP5','CP6'};
+
+% Specify unwanted channles (e.g., if they are noisy)
+% e.g.,: unwanted_channels = {'FC1','FC2','FC5','FC6','CP1','CP2','CP5','CP6'};
 unwanted_channels = {''};
 intersect_channels = setdiff(all_channels,unwanted_channels);
 for i=1:length(intersect_channels)
     EEG_chans(i,:) = intersect_channels{i};
 end
+
+% TODO: do we need this mapping, or should we remove it?
 % EEG_chans(1,:) = 'C03';
 % EEG_chans(2,:) = 'C04';
 % EEG_chans(3,:) = 'C0Z';
@@ -45,12 +49,14 @@ end
 %unused_channels = {'T8','PO3','PO4'}; % For 13 channels headset
 
 % class 1 is idle, 2 is left and 3 is right - for any change still need to
-% change manually MI4 (lines 70-71 and 229-231
-notchList = [50,25];  % check if also need 25!
-highFilter = 40; % Was 50
-lowFilter = 0.5; % Was 0.5
+
+% change manually MI4 
+notchList = [50,25];  
+highFilter = 40; % Originally was 50
+lowFilter = 0.5; 
+
 ICA_threshold = 1;
-fs = 125; % openBCI sample rate
+fs = 125; % openBCI sample rate - can also be extracted from the EEG object of the recordings
 %% Feature extraction parameters
 to_implement_zscore = 1; % 1 is true, otherwise false
 how_many_features_to_select = 10; % Was 10
@@ -60,12 +66,14 @@ frequency_vec = 0.5:1:60;         % frequency vector - lowest:jump:highst
 window = 40;                      % sample size window for pwelch
 noverlap = 20;                    % number of sample overlaps for pwelch
 
-% change bands and times according to graphs (spectogram, ?)
+
+% change frequency bands and times according to graphs (spectogram, ?)
 bands{1} = [2,10];
-bands{2} = [2,10];
-bands{3} = [2,10];
+bands{2} = [17.5,20.5];
+bands{3} = [20.5,22];
 % bands{4} = [17.5,20.5];
 % bands{5} = [20.5,22];
+
 % Make sure times in the trial length range!
 times{1} = (0.3*fs : 1*fs);
 times{2} = (1.7*fs : 2.4*fs);
