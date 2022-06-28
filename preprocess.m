@@ -1,10 +1,14 @@
-function [EEG_Arr] = preprocess(EEG, recordingFolder, eeglab_dir, unused_channels, unwanted_channels, params) 
+function [EEG_Arr] = preprocess(EEG, recordingFolder, eeglab_dir, unused_channels, params) 
 %% Preprocessing
-% a b c ??
 %% Some parameters (this needs to change according to your system):
 addpath(string(eeglab_dir));
-eeglab;                                               % open EEGLAB 
-highLim = params.highLim;                             % filter data under 40 Hz
+
+if params.plot == 1
+    eeglab;                                     % open EEGLAB 
+else
+    eeglab nogui;
+end
+highLim = params.highLim;                               % filter data under 40 Hz
 lowLim = params.lowLim;                               % filter data above 0.5 Hz
 % montage_ulracotext_path = 'montage_ultracortex.ced';
 % standard_electrodes_locations_file = strcat(eeglab_dir, '\\plugins\\dipfit\\standard_BEM\\elec\\standard_1005.elc');
@@ -24,13 +28,13 @@ originalEEG = EEG;
 originalEEG.data = EEG.data;
 
 %% (2) Low Pass Filter 
-EEG = pop_eegfiltnew(EEG, 'hicutoff',highLim,'plotfreqz',1);    % remove data above
+EEG = pop_eegfiltnew(EEG, 'hicutoff',highLim,'plotfreqz',params.plot);    % remove data above
 EEG = eeg_checkset( EEG );
 EEG_afterHigh = EEG;
 EEG_afterHigh.data = EEG.data; % Return highpass
 
 %% (3) High-pass filter
-EEG = pop_eegfiltnew(EEG, 'locutoff',lowLim,'plotfreqz',1);     % remove data under
+EEG = pop_eegfiltnew(EEG, 'locutoff',lowLim,'plotfreqz',params.plot);     % remove data under
 EEG = eeg_checkset( EEG );
 % Save after high pass
 EEG_afterLow = EEG;
@@ -54,10 +58,14 @@ if params.ASR
 else 
     disp('Skipping ASR Preprocessing....')
 end
-    EEG_AfterAR = EEG;
 
-% EEG_AfterAR.data = EEG.data;
-% vis_artifacts(EEG_AfterAR,EEG_AfterLap);
+EEG_AfterAR = EEG;
+
+if params.plot == 1
+  EEG_AfterAR.data = EEG.data;
+  vis_artifacts(EEG_AfterAR,EEG_AfterLap);
+  pause;
+end
 
 %% (6) Laplacian filter
 if params.Laplace
@@ -92,16 +100,25 @@ EEG_AfterChannelRemoval = EEG;
 % Manual - May require editing functions/sigprocfunc/icadefs.m under EEGLAB
 % folder by adding EEGOPTION_PATH = userpath (See Makoto Processing line)
 % because ICAACT is empty
-% Manual? - Insert for manual here
-% Automatic
+
 if params.ICA
     EEG = clean_ica_components(EEG, params.ICA_threshold);
     EEG = eeg_checkset( EEG );
+    EEG_AfterICA = EEG;
+    
+    if params.plot == 1
+      vis_artifacts(EEG_AfterICA,EEG_AfterAR);
+      disp('Review changes after ICA..')
+      pause;
+    end
 else
     disp('Skipping ICA Preprocessing..')
 
-    
+% EEG might not have changed here if params.ICA==false
 EEG_AfterICA = EEG;
+
+
+
 %% Save all the data
 EEG_Arr = [originalEEG, EEG_afterHigh, EEG_afterLow, EEG_afterBandPass, EEG_AfterAR, EEG_AfterLap, EEG_AfterChannelRemoval, EEG_AfterICA];
 % Save the data into .mat variables on the computer
