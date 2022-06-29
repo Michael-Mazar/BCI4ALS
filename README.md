@@ -156,7 +156,7 @@ Record (just like in the offline setting), but show prediction after each trial.
 
 *functionality requires a pre-trained classifier* (model).
 
-1. Open all dependencies (OpenBCI, etc.) 
+1. Run OpenBCI and start streaming
 2. Run `MI_online_Learning.m`
 ### Recording for online prediction (prediction per trial)
 
@@ -164,9 +164,9 @@ Record (just like in the offline setting), but show prediction after each trial.
 
 1. Open all dependencies (OpenBCI, etc.) 
 2. Run `MI_online_predict.m` (this is the backend part, which runs a TCP server)
-3. Run `gui/main.py` (the frontend, GUI application)
+3. Run `python gui/main.py` (the frontend, GUI application); be sure that the virtual environment is activated!
 4. In the GUI, click on the *prediction* button
-5. In the *prediction* screen, click on *start recording* . This will send a "start recording" request to the Matlab server, and will return a prediction (e.g., a number that represents "right", "left", "idle") to the GUI, which will then graphically present the relevant response (e.g., "Yes" or "No")
+5. In the *prediction* screen, click on *Start* . This will send a "start recording" request to the Matlab server, and will return a prediction (e.g., a number that represents "right", "left", "idle") to the GUI, which will then graphically present the relevant response (e.g., "Yes" or "No")
 
 ***
 
