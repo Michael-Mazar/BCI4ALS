@@ -45,8 +45,8 @@ channels that were removed and the recordings that were used. The classifier is 
 
 
 ## Pre-requisites 
-- Matlab R2021b or newer (for python support) with the libLSL, OpenBCI, EEGLab with ERPLAB & loadXDF plugins installed
-- Python 3.7-3.9 (at the time of writing this document, Python 3.10 isn't supported by Matlab)
+- Matlab R2021b or newer (for Python integration support) with the libLSL, OpenBCI, EEGLab with ERPLAB & loadXDF plugins installed.
+- Python 3.7-3.9 (at the time of writing this document, Python 3.10 isn't supported by Matlab).
 
 ## Python dependencies installation 
 
@@ -54,20 +54,20 @@ Follow these instructions (tested on Windows 10 OS) for a one-time installation:
 
 1. Open at terminal at the repository's directory
 2. Run `python -m venv venv` (creating a virtual python environement)
-3. Run `.\venv\Scripts\activate.bat`
-4. Run `pip install -r requirements.txt` to install the requirments in the virtual environment
+3. Run `.\venv\Scripts\activate.bat` (activating the environment)
+4. Run `pip install -r requirements.txt` (installing the requirments in the virtual environment)
 
 ## Pyton-Matlab integration
 
 ### Inter-process integration
-The Python GUI communicates with Matlab via TCP/IP: the Matlab runs a server to which the GUI client sends requets
+The Python GUI communicates with Matlab over TCP/IP: the Matlab runs a server to which the GUI client sends requets
 ### Intra-process integration
 For Python classification, we call Python functions directly from Matlab. Please read the `README.md` file in the `/classification` directory
 
-
-
-
 -----
+
+### % TODO: replace/update/add their instructions with ours
+### Examples for files requiring documentation: `feature_engineering`, `filter_trials.m`, etc...
 
 This part of the code is responsible for recording raw EEG data from the headset, preprocess it, segment it, extract features and
 train a classifier.
@@ -82,6 +82,7 @@ train a classifier.
  data. Features only data is created when co-training on an online session. The aggregation features
  allows to aggregate multiple recording into one training dataset.
 4. prepareTraining.m- Prepare a training vector for training.
+
 
 ### Online
 
@@ -172,9 +173,9 @@ Record (just like in the offline setting), but show prediction after each trial.
 
 For more info, see the documentation located in each code file and the docs file in the documents folder.
 
-### Trobuleshooting
+## Trobuleshooting
 
-#### Our offline classifier preforms very poorly
+### Our offline classifier preforms very poorly
 1. A look on the OpenBCI waves output can help us determine the amount of noise we have. The more
    noise, the less able will be our classifier. **Consider applying more suitable frequency filters or remove bad trials**
 2. **Make sure to clean the ear pieces with alcohol**
@@ -187,10 +188,10 @@ For more info, see the documentation located in each code file and the docs file
 
 * Note: To remove the 25hz peak, you'll need to avoid using a charger and be far away from electronic devices.
 
-### The dongle is pluged in but cannot connect to the headset.
+## The dongle is pluged in but cannot connect to the headset.
 1. Try replacing the batteries.
 
-### Nothing works :(
+## Nothing works :(
 1. Take a deep breath
 2. Disconnect the dongle.
 3. Close all programs.
