@@ -2,16 +2,15 @@ function [trials_to_remove_indices] = filter_trails(MIData,input_range)
 % function to filter bad trails from the data set
 % Inputs:
 % * MIData - Data set after MI3 function.
-% * input_range - input range in uv, keep values in this range.
-%   SHOULD BE 100 for chana
-%
+% * input_range - input range in micro volts (uv), keep values in this range.
+
 % Output:
 % trials_to_remove_indices - list of trails to remove
 
 num_trails = length(MIData(:,1,1));
 electrode_num = length(MIData(1,:,1));
 Mean_values = zeros(electrode_num,num_trails);
-threshold = input_range; % 100 for chana so far
+threshold = input_range; % Might change between mentors and physical environments
 trials_to_remove_indices =  [];
 for i = 1:1:num_trails
     for j = 1:1:electrode_num

@@ -10,6 +10,8 @@ else
 end
 highLim = params.highLim;                               % filter data under 40 Hz
 lowLim = params.lowLim;                               % filter data above 0.5 Hz
+
+% TODO: do we need this?
 % montage_ulracotext_path = 'montage_ultracortex.ced';
 % standard_electrodes_locations_file = strcat(eeglab_dir, '\\plugins\\dipfit\\standard_BEM\\elec\\standard_1005.elc');
     
@@ -91,7 +93,7 @@ EEG = eeg_checkset(EEG );
 EEG_AfterChannelRemoval = EEG;
 % EEG_AfterChannelRemoval.data = EEG;
 
-
+% TODO: do we need this?
 % EEG = pop_clean_rawdata(EEG);
 % EEG = clean_artifacts(EEG,'WindowCriterion','off','ChannelCriterion','off');
 % EEG = pop_autorej(EEG, 'nogui', 'on', 'eegplot', 'on'); - Require data epoc
