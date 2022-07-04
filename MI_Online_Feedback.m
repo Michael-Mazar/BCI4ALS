@@ -37,7 +37,7 @@ onlineTrainingVecAllClasses = prepareTraining(online_trails,MI1params.numClasses
 % IDLE = 1, LEFT = 2, RIGHT = 3
 predictionClasses = [2, 3];
 trainingVectorIndices = find(ismember(onlineTrainingVecAllClasses, predictionClasses));
-onlineTrainingVec = onlineTrainingVecAllClasses(predictionClassesIndices);
+onlineTrainingVec = onlineTrainingVecAllClasses(trainingVectorIndices);
 
 numChans = size(EEG_chans,1);
 MI2params.offline = 0;

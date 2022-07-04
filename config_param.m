@@ -1,3 +1,10 @@
+%% Include sub-folders
+addpath('analysis\');
+addpath('common\');
+addpath('files\');
+addpath('offline pipeline\');
+addpath('processing\');
+
 %% Recording parameters
 numClasses = 2;
 numTrials = 20;
@@ -105,7 +112,7 @@ MI1params = struct('numTrials', numTrials, 'numClasses', numClasses, 'trialLengt
 % Parameters for M2
 MI2params = struct('highLim', highFilter, 'lowLim', lowFilter, 'notch', ...
     notchList, 'ICA_threshold', ICA_threshold, 'channelsNum', size(all_channels,2), ...
-    'offline',1,'ASR',1,'Laplace',1,'ICA',0);
+    'plot',1,'offline',1,'ASR',0,'Laplace',1,'ICA',0);
 
 % Parameters for M4
 MI4params = struct('select', how_many_features_to_select, 'test', ...

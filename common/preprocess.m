@@ -2,7 +2,6 @@ function [EEG_Arr] = preprocess(EEG, recordingFolder, eeglab_dir, unused_channel
 %% Preprocessing
 %% Some parameters (this needs to change according to your system):
 addpath(string(eeglab_dir));
-
 if params.plot == 1
     eeglab;                                     % open EEGLAB 
 else
@@ -10,10 +9,6 @@ else
 end
 highLim = params.highLim;                               % filter data under 40 Hz
 lowLim = params.lowLim;                               % filter data above 0.5 Hz
-
-% TODO: do we need this?
-% montage_ulracotext_path = 'montage_ultracortex.ced';
-% standard_electrodes_locations_file = strcat(eeglab_dir, '\\plugins\\dipfit\\standard_BEM\\elec\\standard_1005.elc');
     
 % Load channels locations
 chan_loc_filename = 'chan_loc.locs';
@@ -25,7 +20,6 @@ EEG = pop_select( EEG, 'nochannel', unused_channels);
 EEG = eeg_checkset( EEG );
 
 %% Save original data
-% Save the initial EEG
 originalEEG = EEG;
 originalEEG.data = EEG.data;
 
@@ -55,19 +49,16 @@ EEG_afterBandPass.data = EEG.data;
 if params.ASR
     EEG = clean_artifacts(EEG,'WindowCriterion','off','LineNoiseCriterion','off','ChannelCriterion','off');
     EEG = eeg_checkset( EEG );
-%     vis_artifacts(EEG,EEG_afterBandPass);
-%     pause;
+    if params.plot == 1
+        vis_artifacts(EEG,EEG_afterBandPass);
+        disp('Review changes after ASR..')
+        pause;
+    end
 else 
     disp('Skipping ASR Preprocessing....')
 end
 
 EEG_AfterAR = EEG;
-
-if params.plot == 1
-  EEG_AfterAR.data = EEG.data;
-  vis_artifacts(EEG_AfterAR,EEG_AfterLap);
-  pause;
-end
 
 %% (6) Laplacian filter
 if params.Laplace
@@ -79,13 +70,17 @@ if params.Laplace
     EEG.data = EEG_afterLapC_3;
     EEG_afterLap_C4 = laplacian_1d_filter(EEG.data, C04_ind, C04_neighbors_ind);
     EEG.data = EEG_afterLap_C4;
+    EEG = eeg_checkset( EEG );
+    if params.plot == 1
+        vis_artifacts(EEG,EEG_AfterAR);
+        disp('Review changes after Laplacian..')
+        pause;
+    end
 else
     disp('Skipping Laplacian integration')
 end
-% Save Laplacian Structure
-EEG = eeg_checkset( EEG );
+
 EEG_AfterLap = EEG;
-% EEG_AfterLap.data = EEG;
 
 %% (7) Remove unwanted channels:
 % EEG = pop_select( EEG, 'nochannel', unwanted_channels);
@@ -93,7 +88,7 @@ EEG = eeg_checkset(EEG );
 EEG_AfterChannelRemoval = EEG;
 % EEG_AfterChannelRemoval.data = EEG;
 
-% TODO: do we need this?
+% TODO: do we need this? - Q for michael
 % EEG = pop_clean_rawdata(EEG);
 % EEG = clean_artifacts(EEG,'WindowCriterion','off','ChannelCriterion','off');
 % EEG = pop_autorej(EEG, 'nogui', 'on', 'eegplot', 'on'); - Require data epoc
@@ -106,10 +101,8 @@ EEG_AfterChannelRemoval = EEG;
 if params.ICA
     EEG = clean_ica_components(EEG, params.ICA_threshold);
     EEG = eeg_checkset( EEG );
-    EEG_AfterICA = EEG;
-    
     if params.plot == 1
-      vis_artifacts(EEG_AfterICA,EEG_AfterAR);
+      vis_artifacts(EEG, EEG_AfterLap);
       disp('Review changes after ICA..')
       pause;
     end

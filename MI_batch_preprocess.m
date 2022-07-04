@@ -2,7 +2,7 @@
 clc; clear; close all;
 %% Load the variables
 % recordingFolder ='C:\Users\micha\Documents\Recordings\Michael_MI_NEW';
-recordingFolder = 'C:\Users\micha\MATLAB\Projects\BCI4ALS_PROJECT\Data';                                                     % Run and extract the parameters
+recordingFolder = 'C:\Users\Raz\GitRepos\BCI4ALS\Data';                                                     % Run and extract the parameters
 folders_to_preprocess = [7:8,12,14,16,22:24,28:32];
 config_param
 %% Verify data folder variable
@@ -63,7 +63,7 @@ else
         end
         % Try preprocessing the file
         EEG.setname = 'MI_sub';
-        preprocess(EEG, dataFolder, eeglabPath, unused_channels, unwanted_channels, MI2params);
+        preprocess(EEG, dataFolder, eeglabPath, unused_channels, MI2params);
         disp('Finished pre-processing the data.')
         [MIData] = MI3_segmentation(dataFolder, fs, trialLength, startMarker, size(EEG_chans,1));
         disp('Finished segmenting the data.');
@@ -75,7 +75,7 @@ else
     end
 end
 %% Preprocess all folders
-function preprocess_loop(recordingFolder,folders_to_preprocess,eeglabPath,unused_channels, unwanted_channels, MI2params,...
+function preprocess_loop(recordingFolder,folders_to_preprocess,eeglabPath,unused_channels, MI2params,...
                 fs, trialLength, startMarker, EEG_chans, trainingVec,bands, times,feature_headers,MI4params,feature_setting)
     addpath(string(eeglabPath));     % lab streaming layer library
     eeglab;
@@ -94,7 +94,7 @@ function preprocess_loop(recordingFolder,folders_to_preprocess,eeglabPath,unused
         end
         % Try preprocessing the file
         EEG.setname = 'MI_sub';
-        preprocess(EEG, dataFolder, eeglabPath, unused_channels, unwanted_channels, MI2params);
+        preprocess(EEG, dataFolder, eeglabPath, unused_channels, MI2params);
         disp('Finished pre-processing the data.')
         [MIData] = MI3_segmentation(dataFolder, fs, trialLength, startMarker, size(EEG_chans,1));
         disp('Finished segmenting the data.');
