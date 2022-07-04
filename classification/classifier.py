@@ -4,8 +4,8 @@ import os
 
 import pickle
 
-# 
-DATA_FOLDER="/Users/osherm/Desktop/HUJI/BCI/BCI4ALS/data/6"
+# Change the default data folder (e.g., the one with MI4's output .mat files) here!
+DATA_FOLDER=""
 
 class Classifier():
     def __init__(self, recordings_folder, model_file_path="model"):
