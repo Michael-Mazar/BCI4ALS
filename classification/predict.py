@@ -1,5 +1,5 @@
 import numpy as np
-from classifier import Classifier, DATA_FOLDER
+from classification.classifier import Classifier, DATA_FOLDER
 
 """
 Input: `datapoints` argument is passed by the MATLAB code when this script is called

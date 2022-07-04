@@ -1,7 +1,7 @@
 from sklearn.model_selection import train_test_split
 from sklearn import svm
 from sklearn import metrics
-from classifier import Classifier, DATA_FOLDER
+from classification.classifier import Classifier, DATA_FOLDER
 
 """
 Triggers model training
