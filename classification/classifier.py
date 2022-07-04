@@ -1,8 +1,11 @@
 import scipy.io
-import numpy as np
+from sklearn import svm
 import os
 
 import pickle
+
+# 
+DATA_FOLDER="/Users/osherm/Desktop/HUJI/BCI/BCI4ALS/data/6"
 
 class Classifier():
     def __init__(self, recordings_folder, model_file_path="model"):
@@ -50,8 +53,16 @@ class Classifier():
         labels = scipy.io.loadmat(os.path.join(self.recordings_folder, labels_file_name))[labels_file_name]
         return features, labels  # returned as numpy arrays
 
-    def trained_model(self, X_train, y_train):
-        clf = svm.SVC(kernel='linear').fit(X_train, y_train)
+    def train_model(self, X, y):
+        """
+        Args:
+            `X` - features
+            `y` - labels
+        Returns:
+            A trained model over X and y
+        """
+        # Feel free to change the model
+        clf = svm.SVC(kernel='linear').fit(X, y.T)
         return clf
 
     def predict_class(self, datapoint):
