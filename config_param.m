@@ -1,7 +1,8 @@
 %% Include sub-folders
 addpath('analysis\');
 addpath('common\');
-addpath('files\');
+addpath('resources\');
+addpath('resources\images');
 addpath('offline pipeline\');
 addpath('processing\');
 

@@ -165,7 +165,8 @@ for trial = 1:onlineNumTrials
         'HorizontalAlignment', 'Center', 'Color', 'white', 'FontSize', 40);
     EEG = pop_importdata('dataformat', 'matlab', 'nbchan', numChans, 'data', buffer, 'srate', fs, 'pnts', 0, 'xmin', 0);
     
-    % TODO: check if trial is valid!! (amplitude, var psd) - show exception
+    % TODO: Consider checking if trial is valid, meaning if its amplitutdes, standard deviations
+    % etc, are within the expected range
     
     decCount = decCount + 1;
     [EEG_arr] = preprocess(EEG, recordingFolder, eeglabPath, unused_channels, MI2params);
