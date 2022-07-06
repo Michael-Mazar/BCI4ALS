@@ -5,7 +5,7 @@ addpath('resources\');
 addpath('resources\images');
 addpath('offline pipeline\');
 addpath('processing\');
-addpath('data features and extraction\');
+addpath('data features\');
 
 %% Recording parameters
 numClasses = 2;
