@@ -66,18 +66,16 @@ MI4_featureExtraction(recordingFolder, MIData, EEG_chans, trainingVec, bands, ti
 disp('Finished extracting features and labels. Press any key to continue...');
 pause;
 
-%% I'll need to pull his changes
-% set trials indices to be remove (e.g., trials_to remove_incides = [1,
-% 15];)
 trials_to_remove_indices = [8,10,18,22]; % FC2 is a bad channel; 
 if ~isempty(trials_to_remove_indices)
     [MIData, trainingVec] = remove_trials(recordingFolder, trials_to_remove_indices);
 end
 
 %% Load features
+% TODO: Do we need the tables?
 two_class_table = readtable('Combined_features_table_2class.txt');
 three_class_table = readtable('Combined_features_table.txt');
 disp('Loaded tables');
 % %% Train a model using features and labels
-% testresult = MI5_modelTraining(recordingFolder);
+training_result = trainModel();
 % disp('Finished training the model. The offline process is done!');
