@@ -1,9 +1,13 @@
-%% MOTOR IMAGERY Training Scaffolding 
+
 %% Refresh
 clc; clear; close all;
 %% Parameters
+
+% Insert the recording folder here
 recordingFolder = 'C:\Users\Raz\BCI4ALS\Recordings\ONLINE_TEST';
 config_param 
+
+% dataFolder is the folder with the `.mat` files that are the output of MI4
 dataFolder = 'C:\Users\Raz\GitRepos\BCI4ALS\data\combined';
 addpath(string(lslPath));     % lab streaming layer library
 addpath(string(lslPath) + '\bin'); % lab streaming layer bin
@@ -58,11 +62,11 @@ disp('Success resolving!');
 EEG_Inlet = lsl_inlet(result{1});
 
 %% Start TCP connection
+% Verify that the Python GUI's client and 
+% this server use the same HOST and PORT
 HOST="localhost";
 PORT=12345;
-CONNECTION_TIMEOUT = 60 * 30; % in seconds
-
-% apllication_python=1;
+CONNECTION_TIMEOUT = 60 * 30; % in seconds - we deliberately allow a long time before closing the connection
 
 disp('Starting TCP server...');
 server = tcpserver(HOST, PORT, "Timeout", CONNECTION_TIMEOUT);
@@ -71,6 +75,8 @@ fprintf('TCP server started on %s, port %d \n', server.ServerAddress, server.Ser
 %% Start Training
 RUN_SERVER = true;
 
+% Note: this server can be extended to another function
+% that servers all interactions between the GUI and the Matlab "backend"
 while RUN_SERVER
     request = readline(server);
     if request=="START"
@@ -99,13 +105,7 @@ while RUN_SERVER
             MIData(1, channel, :) = EEG_data(channel, :);
         end
         [MIFeatures] = feature_engineering(recordingFolder, MIData, bands, times, W, MI4params, feature_setting);
-%     
-%         % TODO: remove the following line
-%         SelectedIdx = 1:10;
         FeaturesSelected = MIFeatures(:, SelectedIdx);
-        %%% If Matlab doing predict:
-        
-%         features = randi(5,1,10);
         prediction = predict(FeaturesSelected);
     
         write(server, int2str(prediction), "string");     
