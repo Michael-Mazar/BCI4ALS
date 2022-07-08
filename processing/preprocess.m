@@ -11,7 +11,7 @@ highLim = params.highLim;                               % filter data under 40 H
 lowLim = params.lowLim;                               % filter data above 0.5 Hz
     
 % Load channels locations
-chan_loc_filename = 'chan_loc.locs';
+chan_loc_filename = 'resources\chan_loc.locs';
 eloc = readlocs(chan_loc_filename);
 EEG.chanlocs = eloc;
 

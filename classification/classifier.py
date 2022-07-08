@@ -1,7 +1,6 @@
 import scipy.io
 from sklearn import svm
 import os
-
 import pickle
 
 # Change the default data folder (e.g., the one with MI4's output .mat files) here!

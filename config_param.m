@@ -2,7 +2,8 @@
 addpath('analysis\');
 addpath('common\');
 addpath('resources\');
-addpath('resources\images');
+imagesFolder = 'resources\images'
+addpath(imagesFolder);
 addpath('offline pipeline\');
 addpath('processing\');
 addpath('data features\');
@@ -19,10 +20,10 @@ eeglabPath = 'C:\Users\Raz\BCI4ALS\eeglab2021.1';
 pyEnvPath = 'C:\Users\Raz\anaconda3\envs\BCI\python.exe';
 rootRecordingPath = 'C:\Users\Raz\BCI4ALS\Recordings';
 %rootRecordingPath = recordingFolder;
-trainingImages{1} = imread('square.png','png'); 
-trainingImages{2} = imread('arrow_left.png','png');
-trainingImages{3} = imread('arrow_right.png','png');
-%recordingFolder = 'C:\Users\Raz\BCI4ALS\Recordings\21_03_22'; % TODO: change back to'C:\Recordings\New_headset_raz\raz_merged';
+trainingImages{1} = imread(strcat(imagesFolder,'square.png'),'png'); 
+trainingImages{2} = imread(strcat(imagesFolder, 'arrow_left.png'),'png');
+trainingImages{3} = imread(strcat(imagesFolder, 'arrow_right.png'),'png');
+
 try
     loaded_temp = load(strcat(recordingFolder,'\trainingVec.mat'));               % load the training vector (which target at which trial)
     trainingVec = loaded_temp.trainingVec;
@@ -32,12 +33,15 @@ end
 %% Preprocessing parameters
 unused_channels = {'T8','PO3','PO4','O2','O1'}; % For 11 channels headset
 all_channels = {'C03','C04','C0Z','FC1','FC2','FC5','FC6','CP1','CP2','CP5','CP6'};
-% unwanted_channels = {'FC1','FC2','FC5','FC6','CP1','CP2','CP5','CP6'};
+
 unwanted_channels = {''};
 intersect_channels = setdiff(all_channels,unwanted_channels);
 for i=1:length(intersect_channels)
     EEG_chans(i,:) = intersect_channels{i};
 end
+
+
+% TODO: clean unecessary code and comments
 % EEG_chans(1,:) = 'C03';
 % EEG_chans(2,:) = 'C04';
 % EEG_chans(3,:) = 'C0Z';

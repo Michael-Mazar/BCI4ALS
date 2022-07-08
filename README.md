@@ -49,7 +49,7 @@ The following steps are common for all flows (Offline recordings, Online recordi
    - OpenBCI
    - Lab Recorder
    - % TODO: anything else?
-2. Run `MI1_offline_training.m`
+2. Run `main_offline.m`
 
 #### **Note**:
 The output files are saved into the given `root_recording_folder/{subject_id}/{recording_time}` 
@@ -82,8 +82,8 @@ The repository is structured from several directories. Below is a short descript
 ### **root** (the current directory)
 
 - `config_params.m` - configures common parameters and loads common packages
-- `main_offline.m` OR `MI1_offline_training.m` - %TODO: which one do we need?
-  Runs the main offline flow (i.e., record, process data, segment, extract features and ) 
+- `main_offline.m` - runs the full offline flow: record trails, preprocess, segment, extract features and train a classifier
+- `MI1_offline_training.m` - Record trials for offline use
 - `MI_batch_preprocess.m` - % TODO: add description here
 - `MI_Online_Feedback.m` - Records trials similar to the offline flow. In addition, *the system's prediction is shown to the user after each trial* - hence the "online feedback". Notes:
 1. Requirements: A trained model, feature weight matrix and selected features indices.
@@ -128,6 +128,9 @@ Includes the code for the GUI. The two main files are:
 
 ### **resources**
 Includes resource files (e.g., images, electrodes mapping file, etc.)
+
+- `chan_loc.locs` - mapping between channels (electrodes) and their physical locations on the headset. Used to process the data in Matlab.
+- `montage_ultracortex.ced` - mapping bewtween electore numbers and their labels. Used in EEGLab/Lab Recorder (Please see the course's recording guide for more details)
 ## Trobuleshooting
 
 ### Our offline classifier preforms very poorly
