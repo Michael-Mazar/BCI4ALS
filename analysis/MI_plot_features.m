@@ -1,7 +1,12 @@
 function MI_plot_features(recordingFolder, feature_setting, EEG_chans)
-
-% TODO: Michael (?) - is this function used? I don't see any references to it
 %% Function description:
+% Input:
+% recordingFolder - The location
+% feature_setting - Which features were extracted (variable in config_file)
+% EEG_chans - Which relevant EEG_chans to plot
+% Output: Generates a heatmap of all features where colors represents
+% weights, rows are for channels and columns are for features
+
 %% Extract all relevant variables
 FeaturesWeights = struct2cell(load(strcat(recordingFolder,'\FeatureWeights.mat')));
 FeaturesWeights = FeaturesWeights{1};
