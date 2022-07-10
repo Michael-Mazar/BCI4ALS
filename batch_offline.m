@@ -7,17 +7,22 @@
 % - Extracts Features
 %% Refresh
 clc; clear all; close all;
+%% Batch preprocess
+config_param
+MI_batch_preprocess
 %%
-recordingFolder = 'C:\Users\micha\MATLAB\Projects\BCI4ALS_PROJECT\Data\combined';                          % Define destination folder for saving new trainingVec
+recordingFolder = '.\Data\combined';                          % Define destination folder for saving new trainingVec
 config_param                                                        % Run and extract the parameters
-dataset = [7:8,12,14,16];                                          % Define which datasets to combine (What each number means is in excel)
+% dataset = [22:24,25:32];
+dataset = [7:8,12,14,16];                                            % Define which datasets to combine (What each number means is in excel)
 folder = 'C:\Users\micha\MATLAB\Projects\BCI4ALS_PROJECT\Data';      % Define target folder which contains all hana's recordings
 [MIData, trainingVec] = MI_combineDataset(dataset, folder);          % Combine MIData
 %% Edit MI Data
+% Removes either trials or channels
 [MIData, trainingVec] = MI_edit_dataset(recordingFolder, MIData, trainingVec, [4:11], []);
 %%
 MI_plot_basics(recordingFolder, MIData, [1:3], trainingVec, EEG_chans, MI4params)
-%% Run MI4 (Extract features and labels)
+%% Run MI4 (Extract features and labels). To extract features from combined dataset
 MI4params.z = 1;
-MI4_featureExtraction_new(recordingFolder, MIData, EEG_chans, trainingVec, bands, times, feature_headers, MI4params, feature_setting);
-disp('Finished extracting features and labels. Press any key to continue...');
+MI4_featureExtraction_two_class(recordingFolder, MIData, EEG_chans, trainingVec, bands, times, feature_headers, MI4params, feature_setting);
+disp('Finished extracting features and labels.');

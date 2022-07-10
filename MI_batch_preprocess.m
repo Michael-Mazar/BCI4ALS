@@ -1,12 +1,12 @@
-% TODO: document
-
+% A script which preprocesses several datasets together, make sure to
+% define which folders and parameter to preprocess below
 %% Refresh
 clc; clear; close all;
 %% Load the variables
-
 % Change to the relevant folder
-recordingFolder = '';                                                     % Run and extract the parameters
-folders_to_preprocess = [7:8,12,14,16,22:24,28:32];
+recordingFolder = '.\Data\';                                                     % Run and extract the parameters
+folders_to_preprocess = [7:8,12,14,16];
+% folders_to_preprocess = [7:8,12,14,16,22:24,28:32];                              % Example datasets to preprocess
 config_param
 %% Verify data folder variable
 if ~endsWith(recordingFolder ,'\')

@@ -148,5 +148,6 @@ MIFeatures = [CSPFeatures MIFeatures];              % add the CSP features to th
 AllDataInFeatures = MIFeatures;
 if params.offline == 1
     save(strcat(recordingFolder,'\AllDataInFeatures.mat'),'AllDataInFeatures');
+    save(strcat(recordingFolder,'\CSPFeatures.mat'),'CSPFeatures');
 end
 end

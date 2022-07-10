@@ -2,7 +2,7 @@
 clc; clear; close all;
 %% Parameters
 config_param
-dataFolder = 'C:\Users\Raz\GitRepos\BCI4ALS\data\combined';
+dataFolder = '.\Data\combined';
 addpath(string(lslPath));     % lab streaming layer library
 addpath(string(lslPath) + '\bin'); % lab streaming layer bin
 addpath(string(eeglabPath)); 
