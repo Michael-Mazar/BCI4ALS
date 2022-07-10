@@ -54,6 +54,15 @@ The following steps are common for all flows (Offline recordings, Online recordi
    - % TODO: anything else?
 2. Run `main_offline.m`
 
+### Performing Offline analysis
+1. Make sure the recording are located under Data folder and numerically numbered
+2. Before running script batch_offline.m make sure to specify configurations
+   - Specify which dataset to run pipeline on
+   - Specify which channels and trials to remove from combined dataset
+   - Other relevant parameters can be specified in config_param.m file
+3. Run batch_offline.m: This will perform offline analysis in batch. 
+4. Run classification using with classifier.py, make sure to specify target 'Data/combined' folder in .py file
+
 #### **Note**:
 The output files are saved into the given `root_recording_folder/{subject_id}/{recording_time}` 
 
