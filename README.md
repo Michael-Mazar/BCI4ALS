@@ -104,7 +104,7 @@ The repository is structured from several directories. Below is a short descript
   
   *Requirements*: A trained model, feature weight matrix and selected features indices.
 
-### **Classification**
+### **classification**
 classification code. Offers two main functionalities: *train* (which trains ans saves a model) and *predict* (which uses the saved model to predict). This code is called by Matlab wrappers.
 
 It's highly recommended to read the `README.md` file in this directory, to better understand how the Matlab-Python ingegration here works.
@@ -129,7 +129,7 @@ Includes the code for the GUI. The two main files are:
   - `main.py`  - runs the GUI application, based on the Kivy library. Currently, the GUI shows some buttons and functionalities that are not implemented (but should be in the future).
   - `mimain.kv` - a configuration file for the GUI. Please see [Kivy documentation](https://kivy.org/doc/stable/guide/basic.html) for more details.
 
-### **Offline** 
+### **offline** 
 Folder contains function for offline analysis of datasets, combinining or editing datasets or function for running the offline pupeline:
 Different functions that may be helpful to analyze data, such as finding "bad" (noisy) trials, check the effect of different features, etc:
 Offline pipeline functions
@@ -148,7 +148,7 @@ For analysis
 
 We reccomend running the script 'batch_offline' as it incorporates all the analysis functions for convenience on data
 
-### **Processing** 
+### **processing** 
 Includes several function for preprocessing MI Datasets
    - `preprocess`: the main preprocessing function, containing various preprocessing steps including low pass, high pass, notch, laplace, ASR and ICA. the file is ran from the main offline pipeline and is configured according to config_params, which allows for skipping some preprocessing steps
    - `clean_ica_components`: cleans irrelevant ICA component determined by a defined threshold and using automatic ICA EEGLAB package 
@@ -157,7 +157,7 @@ Includes several function for preprocessing MI Datasets
    - `remove_trial`: A function which removes trials manually
    - `sortElectrode`: Sorts electrodes data for further segmentation
 
-### **Resources**
+### **resources**
 Includes resource files (e.g., images, electrodes mapping file, etc.)
 
 - `chan_loc.locs` - mapping between channels (electrodes) and their physical locations on the headset. Used to process the data in Matlab.
