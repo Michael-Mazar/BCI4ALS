@@ -1,6 +1,14 @@
 function [MIData, trainingVec] = remove_trials(recordingFolder, indices_to_remove, MIData, trainingVec)
-% TODO: add description
+% Removes trials for MIData
 
+% Args:
+%   MIData - Recording data
+%   indices_to_remove - indices to remove from MIData
+%   trainingVec - includes the labels (classes) of each trials
+
+% Returns:
+% MIData - the modified data (without the removed trials)
+% trainingVec - the modified trainingVec (for the new number trials, after the removal)
 removedIdleNum = sum(trainingVec(:, indices_to_remove) == 1);
 removedLeftNum = sum(trainingVec(:, indices_to_remove) == 2);
 removedRightNum = sum(trainingVec(:, indices_to_remove) == 3);

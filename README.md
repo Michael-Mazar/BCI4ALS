@@ -130,10 +130,10 @@ Includes the code for the GUI. The two main files are:
   - `mimain.kv` - a configuration file for the GUI. Please see [Kivy documentation](https://kivy.org/doc/stable/guide/basic.html) for more details.
 
 ### **offline** 
-Folder contains function for offline analysis of datasets, combinining or editing datasets or function for running the offline pupeline:
+This folder contains function for offline analysis of datasets, combinining or editing datasets or function for running the offline pupeline:
 Different functions that may be helpful to analyze data, such as finding "bad" (noisy) trials, check the effect of different features, etc:
 Offline pipeline functions
-   - `batch_offline`: Runs many of the function below, preprocesses selected datasets, combines them and then extracts features that could be classified using either python function specified above or matlab classification functions
+   - `batch_offline.m`: Runs many of the function below, preprocesses selected datasets, combines them and then extracts features that could be classified using either python function specified above or matlab classification functions
    - `MI_combineDataset.m`:  Combines MIData variables of EEG datasets (After MI3 segmentation) based on selection of which folders from the Data folders
    - `MI_edit_dataset.m`: Edits MIData sets by removing trials or EEG channels according to personal selection
    - `MI3_segmentation.m`: A function for segmentation of dataset after preprocessing
