@@ -1,17 +1,19 @@
 # BCI4ALS - HUJI - Team 51
 ## General
 
-This repository contains the code for Motor Imagery pipeline, as part of the BCI4ALS course during the 2021-2022 academic year.
+This repository contains the code for our team's implementation's of Motor Imagery pipeline, as part of the BCI4ALS course during the 2021-2022 academic year. 
+We strived to create an interactive GUI for mentor alongside online prediction of motor imagery for the corresponding YES/NO response. This project also contain offline analysis pipeline and online feedback pipeline towards motor imagery training. Finally, we included a variety of analysis functions for better understanding the motor imagery signal.
+
+https://user-images.githubusercontent.com/73441199/178137940-794c8a49-2a74-4f92-991e-9ef693c5c363.mp4
 
 The code is a fork of Asaf Harel (harelasa@post.bgu.ac.il) [basic code for the BCI-4-ALS course](https://github.com/harelasaf/BCI4ALS-MI) which
 was taken place in Ben Gurion University during 2020/2021. You are free to use, change, adapt and
 so on - but please cite properly if published. 
 
-
 ✨  Team 51 contact details   ✨
 
 %% TODO: add emails
-- Michael Mazar (ADD email here)
+- Michael Mazar (Michael.Mazar@mail.huji.ac.il)
 - Nadav Am-Shalom (ADD email here)
 - Raz Perry (ADD email here)
 - Osher Maayan (osher.maayan@mail.huji.ac.il)
@@ -19,6 +21,7 @@ so on - but please cite properly if published.
 ## Pre-requisites 
 - Matlab R2021b or newer (for Python integration support) with the libLSL, OpenBCI, EEGLab with ERPLAB & loadXDF plugins installed (instruction are in the course's documentation).
 - Python 3.7-3.9 (at the time of writing this document, Python 3.10 isn't supported by Matlab).
+- Make sure datasets are organized in the subfolder of Data for some of the function to work
 
 ## Python dependencies installation 
 
@@ -92,10 +95,7 @@ The repository is structured from several directories. Below is a short descript
   
   *Requirements*: A trained model, feature weight matrix and selected features indices.
 
-### **analysis** %TODO: add here
-Different functions that may be helpful to analyze data, such as finding "bad" (noisy) trials, check the effect of different features, etc.
-
-### **classification**
+### **Classification**
 classification code. Offers two main functionalities: *train* (which trains ans saves a model) and *predict* (which uses the saved model to predict). This code is called by Matlab wrappers.
 
 It's highly recommended to read the `README.md` file in this directory, to better understand how the Matlab-Python ingegration here works.
@@ -104,8 +104,6 @@ It's highly recommended to read the `README.md` file in this directory, to bette
 1. In `classifier.py`, set the `DATA_FOLDER` variable to the directory with the `AllDataInFeatures.mat` and `trainingVec.mat` files
 2. You can (and should) experiment with different classifier (e.g., svm, knn and so on) and then change the classifier class in `train_model` function in `classifier.py`
 3. Tip: to determine which classifier to use, you can run the Python code independelty from Matlab and run lazyPredict/Hyper-parameters Grid/Bayes Search and so on.
-
-
 
 Files:
 - `classifier.py` - includes the main classification logic and exposes an interface for training a model and using a model to predict. By default, the trained model is saved to and loaded from the same path, under the name `model`. 
@@ -122,18 +120,42 @@ Includes the code for the GUI. The two main files are:
   - `main.py`  - runs the GUI application, based on the Kivy library. Currently, the GUI shows some buttons and functionalities that are not implemented (but should be in the future).
   - `mimain.kv` - a configuration file for the GUI. Please see [Kivy documentation](https://kivy.org/doc/stable/guide/basic.html) for more details.
 
-### **offlien pipeline** - ֵ%TODO: add here
+### **Offline** 
+Folder contains function for offline analysis of datasets, combinining or editing datasets or function for running the offline pupeline:
+Different functions that may be helpful to analyze data, such as finding "bad" (noisy) trials, check the effect of different features, etc:
+Offline pipeline functions
+   - `batch_offline`: Runs many of the function below, preprocesses selected datasets, combines them and then extracts features that could be classified using either python function specified above or matlab classification functions
+   - `MI_combineDataset.m`:  Combines MIData variables of EEG datasets (After MI3 segmentation) based on selection of which folders from the Data folders
+   - `MI_edit_dataset.m`: Edits MIData sets by removing trials or EEG channels according to personal selection
+   - `MI3_segmentation.m`: A function for segmentation of dataset after preprocessing
+   - `MI4_featureExtraction.m`: Performs feature extraction on a dataset with three classes
+   - `MI4_featureExtraction_two_class.m`: Performs feature extraction on a data with two classes
+   - `MI5_modelTraining.m`:  Trains a linear model based on provided dataset
+   - `MI5_trainClassifier.m`:  Trains a matlab SVM classifier based on provided dataset
+For analysis
+   - `MI_plot_basics.m`: EEG Plot including PSDs, Spectograms, CSPs, and ERPs
+   - `MI_plot_features`: Creates heatmap matrix for weights after features selection as a function of channel and feature
+   - `MI_plot_spectrogram.m`: Auxilary spectogram plotting function 
 
-### **processing** - ֵ%TODO: add here
+We reccomend running the script 'batch_offline' as it incorporates all the analysis functions for convenience on data
 
-### **resources**
+### **Processing** 
+Includes several function for preprocessing MI Datasets
+   - `preprocess`: the main preprocessing function, containing various preprocessing steps including low pass, high pass, notch, laplace, ASR and ICA. the file is ran from the main offline pipeline and is configured according to config_params, which allows for skipping some preprocessing steps
+   - `clean_ica_components`: cleans irrelevant ICA component determined by a defined threshold and using automatic ICA EEGLAB package 
+   - `laplacian_1d_filter`: Performs laplace filter on C3 and C4 electrodes though adjacent electrodes. Note: CZ electrode is not used in this filter
+   - `filter_trial`: A function for filtering unwanted trials according to specified criteria
+   - `remove_trial`: A function which removes trials manually
+   - `sortElectrode`: Sorts electrodes data for further segmentation
+
+### **Resources**
 Includes resource files (e.g., images, electrodes mapping file, etc.)
 
 - `chan_loc.locs` - mapping between channels (electrodes) and their physical locations on the headset. Used to process the data in Matlab.
 - `montage_ultracortex.ced` - mapping bewtween electore numbers and their labels. Used in EEGLab/Lab Recorder (Please see the course's recording guide for more details)
-## Trobuleshooting
+## Troubleshooting
 
-### Our offline classifier preforms very poorly
+### Our offline classifier preforms poorly
 1. A look on the OpenBCI waves output can help us determine the amount of noise we have. The more
    noise, the less able will be our classifier. **Consider applying more suitable frequency filters or remove bad trials**
 2. Click several times on the notch filter to bring it to 50hz, even if it is currently on 50hz.
