@@ -1,7 +1,9 @@
 # BCI4ALS - HUJI - Team 51
 ## General
 
-This repository contains the code for Motor Imagery pipeline, as part of the BCI4ALS course during the 2021-2022 academic year.
+This repository contains the code for our team's implementation's of Motor Imagery pipeline, as part of the BCI4ALS course during the 2021-2022 academic year. 
+
+https://user-images.githubusercontent.com/73441199/178137940-794c8a49-2a74-4f92-991e-9ef693c5c363.mp4
 
 The code is a fork of Asaf Harel (harelasa@post.bgu.ac.il) [basic code for the BCI-4-ALS course](https://github.com/harelasaf/BCI4ALS-MI) which
 was taken place in Ben Gurion University during 2020/2021. You are free to use, change, adapt and
@@ -104,8 +106,6 @@ It's highly recommended to read the `README.md` file in this directory, to bette
 1. In `classifier.py`, set the `DATA_FOLDER` variable to the directory with the `AllDataInFeatures.mat` and `trainingVec.mat` files
 2. You can (and should) experiment with different classifier (e.g., svm, knn and so on) and then change the classifier class in `train_model` function in `classifier.py`
 3. Tip: to determine which classifier to use, you can run the Python code independelty from Matlab and run lazyPredict/Hyper-parameters Grid/Bayes Search and so on.
-
-
 
 Files:
 - `classifier.py` - includes the main classification logic and exposes an interface for training a model and using a model to predict. By default, the trained model is saved to and loaded from the same path, under the name `model`. 
