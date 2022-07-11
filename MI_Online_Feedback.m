@@ -2,7 +2,7 @@
 clc; clear; close all;
 %% Parameters
 config_param
-dataFolder = '.\Data\combined';
+dataFolder = '.\Data\michael';
 addpath(string(lslPath));     % lab streaming layer library
 addpath(string(lslPath) + '\bin'); % lab streaming layer bin
 addpath(string(eeglabPath)); 

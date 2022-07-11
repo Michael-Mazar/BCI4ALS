@@ -7,10 +7,11 @@ addpath(imagesFolder);
 addpath('offline\');
 addpath('processing\');
 addpath('data features\');
+addpath('classification\');
 
 %% Recording parameters
 numClasses = 2;
-numTrials = 20;
+numTrials = 10;
 trialLength = 5;  % remember to change times for bandpower!
 waitList = [20, 1.5, 1.5, 1.5]; % init, ready, cue, next
 startMarker = 1111;
@@ -67,8 +68,8 @@ fs = 125; % openBCI sample rate
 %% Feature extraction parameters
 to_implement_zscore = 1; % 1 is true, otherwise false
 how_many_features_to_select = 10; % Was 10
-how_many_test_for_class = 5;
-vizTrial = 5; % what is this?
+how_many_test_for_class = 5; % compare with numTrials!
+vizTrial = 5; % make sure it is smaller than number of trials - it is a trial to vizualize the csp
 frequency_vec = 0.5:1:60;         % frequency vector - lowest:jump:highst
 window = 40;                      % sample size window for pwelch
 noverlap = 20;                    % number of sample overlaps for pwelch

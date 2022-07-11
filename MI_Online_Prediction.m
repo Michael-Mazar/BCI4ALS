@@ -8,7 +8,7 @@ recordingFolder = 'C:\Users\Raz\BCI4ALS\Recordings\ONLINE_TEST';
 config_param 
 
 % dataFolder is the folder with the `.mat` files that are the output of MI4
-dataFolder = 'C:\Users\Raz\GitRepos\BCI4ALS\data\combined';
+dataFolder = 'C:\Users\Raz\GitRepos\BCI4ALS\data\michael';
 addpath(string(lslPath));     % lab streaming layer library
 addpath(string(lslPath) + '\bin'); % lab streaming layer bin
 addpath(string(eeglabPath)); 
