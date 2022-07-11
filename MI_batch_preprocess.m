@@ -1,5 +1,5 @@
-% A script which preprocesses several datasets together, make sure to
-% define which folders and parameter to preprocess below
+% A script which preprocesses several datasets together, 
+% make sure to define which folders and parameter to preprocess below
 %% Refresh
 clc; clear; close all;
 %% Load the variables

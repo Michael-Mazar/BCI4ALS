@@ -83,17 +83,13 @@ end
 EEG_AfterLap = EEG;
 
 %% (7) Remove unwanted channels:
+% Currently doesnt do anything but alocates this stage for channel removal
+% before ICA
 % EEG = pop_select( EEG, 'nochannel', unwanted_channels);
 EEG = eeg_checkset(EEG );
 EEG_AfterChannelRemoval = EEG;
-% EEG_AfterChannelRemoval.data = EEG;
 
-% TODO: do we need this? - Q for michael
-% EEG = pop_clean_rawdata(EEG);
-% EEG = clean_artifacts(EEG,'WindowCriterion','off','ChannelCriterion','off');
-% EEG = pop_autorej(EEG, 'nogui', 'on', 'eegplot', 'on'); - Require data epoc
-% Insert for Manual cleaning here
-%% (9) ICA Processing
+%% (8) ICA Processing
 % Manual - May require editing functions/sigprocfunc/icadefs.m under EEGLAB
 % folder by adding EEGOPTION_PATH = userpath (See Makoto Processing line)
 % because ICAACT is empty
@@ -111,8 +107,6 @@ else
 
 % EEG might not have changed here if params.ICA==false
 EEG_AfterICA = EEG;
-
-
 
 %% Save all the data
 EEG_Arr = [originalEEG, EEG_afterHigh, EEG_afterLow, EEG_afterBandPass, EEG_AfterAR, EEG_AfterLap, EEG_AfterChannelRemoval, EEG_AfterICA];
