@@ -13,7 +13,7 @@ addpath('classification\');
 numClasses = 2;
 numTrials = 10;
 trialLength = 5;  % remember to change times for bandpower!
-waitList = [20, 1.5, 1.5, 1.5]; % init, ready, cue, next
+waitList = [10, 1.5, 1.5, 1.5]; % init, ready, cue, next
 startMarker = 1111;
 markersList = [000, 99, startMarker, 9, 1001]; % startRec, endRec, startTrial, endTrial, baseline 
 lslPath = 'C:\Program Files\Toolboxes\liblsl-Matlab';

@@ -70,7 +70,7 @@ for trial=1:size(leftClass,1)
     overallRight = [overallRight squeeze(rightClass(trial,:,:))];
 end
 
-vizTrial = params.vizTrial;       % cherry-picked!
+vizTrial = 2;       % cherry-picked!
 figure;
 subplot(1,2,1)      % show a single trial before CSP seperation
 scatter3(squeeze(leftClass(vizTrial,1,:)),squeeze(leftClass(vizTrial,2,:)),squeeze(leftClass(vizTrial,3,:)),'b'); hold on
@@ -155,31 +155,4 @@ Combined_features_table.Properties.VariableNames(1) = {'Class'};
 Combined_features_table.Class = categorical(Combined_features_table.Class,1:3,{'Idle' 'Left','Right'});
 writetable(Combined_features_table);
 
-%% Feature Table for two classes:
-% Save a table for the whole features
-testIdx = randperm(length(rightIdx),4);                       % picking test index randomly
-testIdx = [leftIdx(testIdx) rightIdx(testIdx)];    % taking the test index from each class
-DelIdx = [ testIdx idleIdx];
-% testIdx = [leftIdx(testIdx) idleIdx(testIdx)]; 
-% DelIdx = [ testIdx rightIdx];
-testIdx = sort(testIdx); 
-FeaturesTest_2class = MIFeatures(testIdx,:,:);     % Redundant third dimension? taking the test trials features from each class
-LabelTest_2class = targetLabels(testIdx);
-% split train data
-FeaturesTrain_2class = MIFeatures;
-
-FeaturesTrain_2class (DelIdx,:,:) = [];          % delete the test trials from the features matrix, and keep only the train trials
-LabelTrain_2class = targetLabels;
-LabelTrain_2class(DelIdx) = [];
-class_2 = fscnca(FeaturesTrain_2class,LabelTrain_2class,'Solver','sgd','Verbose',1);
-[~,selected] = sort(class_2.FeatureWeights,'descend');
-% taking only the specified number of features with the largest weights
-SelectedIdx = selected(1:Features2Select);
-FeaturesTrainSelected_2class = FeaturesTrain_2class(:,SelectedIdx);       % updating the matrix feature
-FeaturesTest_2class = FeaturesTest_2class(:,SelectedIdx);
-Combined_features_mat_2class = [LabelTrain_2class' FeaturesTrainSelected_2class; LabelTest_2class' FeaturesTest_2class];
-Combined_features_table_2class = array2table(Combined_features_mat_2class);
-Combined_features_table_2class.Properties.VariableNames(1) = {'Class'};
-Combined_features_table_2class.Class = categorical(Combined_features_table_2class.Class,1:3,{'Idle' 'Left','Right'});
-writetable(Combined_features_table_2class);
 end
