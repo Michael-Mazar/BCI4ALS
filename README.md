@@ -12,10 +12,9 @@ so on - but please cite properly if published.
 
 ✨  Team 51 contact details   ✨
 
-%% TODO: add emails
 - Michael Mazar (Michael.Mazar@mail.huji.ac.il)
-- Nadav Am-Shalom (ADD email here)
-- Raz Perry (ADD email here)
+- Nadav Am-Shalom (TODO: ADD email here)
+- Raz Perry (raz.perry@mail.huji.ac.il)
 - Osher Maayan (osher.maayan@mail.huji.ac.il)
 
 ## Pre-requisites 
@@ -51,7 +50,6 @@ The following steps are common for all flows (Offline recordings, Online recordi
 1. Open all dependencies:
    - OpenBCI
    - Lab Recorder
-   - % TODO: anything else?
 2. Run `main_offline.m`
 
 ### Performing Offline analysis
@@ -96,7 +94,7 @@ The repository is structured from several directories. Below is a short descript
 - `config_params.m` - configures common parameters and loads common packages
 - `main_offline.m` - runs the full offline flow: record trails, preprocess, segment, extract features and train a classifier
 - `MI1_offline_training.m` - Record trials for offline use
-- `MI_batch_preprocess.m` - % TODO: add description here
+- `MI_batch_preprocess.m` -  Preprocess several datasets together
 - `MI_Online_Feedback.m` - Records trials similar to the offline flow. In addition, *the system's prediction is shown to the user after each trial* - hence the "online feedback". Notes:
 1. Requirements: A trained model, feature weight matrix and selected features indices.
 2. The trials are saved to file (like in the offline flow)
@@ -120,10 +118,10 @@ Files:
 - `predict.m` - Matlab wrapper for `predict.py` 
 - `train.py` - trains and saves a model based on the data in `DATA_FOLDER` (see note above). Returns the training result (training succeded/failed), and if succeeded - the model's accuracy score.
 - `trainModel.m` - Matlab wrapper for `train.py` 
-### **common** - ֵ%TODO: add here
 
-### **data features and extraction** - ֵ%TODO: add here
-
+### **data features**
+- `feature_engineering.m` -This function extracts features for the machine learning process.
+% Starts by visualizing the data (power spectrum) to find the best powerbands.
 ### **gui** (Graphical User Interface)
 Includes the code for the GUI. The two main files are:
   - `main.py`  - runs the GUI application, based on the Kivy library. Currently, the GUI shows some buttons and functionalities that are not implemented (but should be in the future).
@@ -171,8 +169,6 @@ Includes resource files (e.g., images, electrodes mapping file, etc.)
    A look on the FFT around 50hz should reveal a negative peak. If you still see a peak, try replacing the bateries or
    move to another room. Try eliminiate all sources of noise such as electricity (e.g., turn off electric devices). Try to reposition the headset.
    Make sure you put the ear pieces on your ear lobes.
-
-%%% TODO: add more troubleshooting advices
 
 * Note: To remove the 25hz peak, you'll need to avoid using a charger and be far away from electronic devices.
 
