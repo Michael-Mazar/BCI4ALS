@@ -16,10 +16,13 @@ trialLength = 5;  % remember to change times for bandpower!
 waitList = [10, 1.5, 1.5, 1.5]; % init, ready, cue, next
 startMarker = 1111;
 markersList = [000, 99, startMarker, 9, 1001]; % startRec, endRec, startTrial, endTrial, baseline 
-lslPath = 'C:\Program Files\Toolboxes\liblsl-Matlab';
-eeglabPath = 'C:\Program Files\Toolboxes\eeglab2021.1';
-pyEnvPath = 'C:\Users\Raz\anaconda3\envs\BCI\python.exe';
-rootRecordingPath = 'C:\Users\Raz\BCI4ALS\Recordings';
+
+
+% INSERT THE RELEVANT PATHS HERE!
+lslPath = ''; % For example: 'C:\Program Files\Toolboxes\liblsl-Matlab';
+eeglabPath = ''; % For example: 'C:\Program Files\Toolboxes\eeglab2021.1';
+pyEnvPath = ''; % For example: 'C:\Users\Raz\anaconda3\envs\BCI\python.exe';
+rootRecordingPath = ''; % For example: 'C:\Users\Raz\BCI4ALS\Recordings';
 %rootRecordingPath = recordingFolder;
 trainingImages{1} = imread(strcat(imagesFolder,'square.png'),'png'); 
 trainingImages{2} = imread(strcat(imagesFolder, 'arrow_left.png'),'png');

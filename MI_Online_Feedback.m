@@ -2,7 +2,9 @@
 clc; clear; close all;
 %% Parameters
 config_param
-dataFolder = '.\Data\michael';
+
+% INSERT PATH TO DATA FOLDER (with the outputs of MI4)
+dataFolder = '';
 addpath(string(lslPath));     % lab streaming layer library
 addpath(string(lslPath) + '\bin'); % lab streaming layer bin
 addpath(string(eeglabPath)); 

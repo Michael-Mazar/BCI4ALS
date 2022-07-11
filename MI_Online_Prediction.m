@@ -3,12 +3,14 @@
 clc; clear; close all;
 %% Parameters
 
-% Insert the recording folder here
-recordingFolder = 'C:\Users\Raz\BCI4ALS\Recordings\ONLINE_TEST';
+% Insert the recording folder here!
+recordingFolder = '' % For example: 'C:\Users\Raz\BCI4ALS\Recordings\ONLINE_TEST';
 config_param 
 
 % dataFolder is the folder with the `.mat` files that are the output of MI4
-dataFolder = 'C:\Users\Raz\GitRepos\BCI4ALS\data\michael';
+% Insert the recording folder here!
+
+dataFolder = '' % For example: 'C:\Users\Raz\GitRepos\BCI4ALS\data\michael';
 addpath(string(lslPath));     % lab streaming layer library
 addpath(string(lslPath) + '\bin'); % lab streaming layer bin
 addpath(string(eeglabPath)); 
@@ -16,8 +18,11 @@ eeglab nogui;
 
 % Setup Python interperter
 % TODO: consider adding Python interperter path to config_params
+
+% INSERT PATH TO THE VIRTUAL ENVIRONMENT'S PYTHON EXECUTABLE!
+pythonEvnPath = '' % For example: 'C:\Users\Raz\anaconda3\envs\BCI\python.exe'
 try
-    pyenv('Version','C:\Users\Raz\anaconda3\envs\BCI\python.exe');
+    pyenv('Version',pythonEvnPath);
 
 catch e
     disp(e);
