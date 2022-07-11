@@ -1,19 +1,33 @@
+%% Include sub-folders
+addpath('analysis\');
+addpath('common\');
+addpath('resources\');
+imagesFolder = 'resources\images\';
+addpath(imagesFolder);
+addpath('offline\');
+addpath('processing\');
+addpath('data features\');
+addpath('classification\');
+
 %% Recording parameters
 numClasses = 2;
-numTrials = 20;
+numTrials = 10;
 trialLength = 5;  % remember to change times for bandpower!
-waitList = [20, 1.5, 1.5, 1.5]; % init, ready, cue, next
+waitList = [10, 1.5, 1.5, 1.5]; % init, ready, cue, next
 startMarker = 1111;
 markersList = [000, 99, startMarker, 9, 1001]; % startRec, endRec, startTrial, endTrial, baseline 
-lslPath = 'C:\Users\Raz\BCI4ALS\liblsl-Matlab';
-eeglabPath = 'C:\Users\Raz\BCI4ALS\eeglab2021.1';
-pyEnvPath = 'C:\Users\Raz\anaconda3\envs\BCI\python.exe';
-rootRecordingPath = 'C:\Users\Raz\BCI4ALS\Recordings';
+
+
+% INSERT THE RELEVANT PATHS HERE!
+lslPath = ''; % For example: 'C:\Program Files\Toolboxes\liblsl-Matlab';
+eeglabPath = ''; % For example: 'C:\Program Files\Toolboxes\eeglab2021.1';
+pyEnvPath = ''; % For example: 'C:\Users\Raz\anaconda3\envs\BCI\python.exe';
+rootRecordingPath = ''; % For example: 'C:\Users\Raz\BCI4ALS\Recordings';
 %rootRecordingPath = recordingFolder;
-trainingImages{1} = imread('square.png','png'); 
-trainingImages{2} = imread('arrow_left.png','png');
-trainingImages{3} = imread('arrow_right.png','png');
-%recordingFolder = 'C:\Users\Raz\BCI4ALS\Recordings\21_03_22'; % TODO: change back to'C:\Recordings\New_headset_raz\raz_merged';
+trainingImages{1} = imread(strcat(imagesFolder,'square.png'),'png'); 
+trainingImages{2} = imread(strcat(imagesFolder, 'arrow_left.png'),'png');
+trainingImages{3} = imread(strcat(imagesFolder, 'arrow_right.png'),'png');
+
 try
     loaded_temp = load(strcat(recordingFolder,'\trainingVec.mat'));               % load the training vector (which target at which trial)
     trainingVec = loaded_temp.trainingVec;
@@ -23,12 +37,15 @@ end
 %% Preprocessing parameters
 unused_channels = {'T8','PO3','PO4','O2','O1'}; % For 11 channels headset
 all_channels = {'C03','C04','C0Z','FC1','FC2','FC5','FC6','CP1','CP2','CP5','CP6'};
-% unwanted_channels = {'FC1','FC2','FC5','FC6','CP1','CP2','CP5','CP6'};
+
 unwanted_channels = {''};
 intersect_channels = setdiff(all_channels,unwanted_channels);
 for i=1:length(intersect_channels)
     EEG_chans(i,:) = intersect_channels{i};
 end
+
+
+% TODO: clean unecessary code and comments
 % EEG_chans(1,:) = 'C03';
 % EEG_chans(2,:) = 'C04';
 % EEG_chans(3,:) = 'C0Z';
@@ -54,8 +71,8 @@ fs = 125; % openBCI sample rate
 %% Feature extraction parameters
 to_implement_zscore = 1; % 1 is true, otherwise false
 how_many_features_to_select = 10; % Was 10
-how_many_test_for_class = 5;
-vizTrial = 5; % what is this?
+how_many_test_for_class = 5; % compare with numTrials!
+vizTrial = 5; % make sure it is smaller than number of trials - it is a trial to vizualize the csp
 frequency_vec = 0.5:1:60;         % frequency vector - lowest:jump:highst
 window = 40;                      % sample size window for pwelch
 noverlap = 20;                    % number of sample overlaps for pwelch
@@ -105,7 +122,7 @@ MI1params = struct('numTrials', numTrials, 'numClasses', numClasses, 'trialLengt
 % Parameters for M2
 MI2params = struct('highLim', highFilter, 'lowLim', lowFilter, 'notch', ...
     notchList, 'ICA_threshold', ICA_threshold, 'channelsNum', size(all_channels,2), ...
-    'offline',1,'ASR',1,'Laplace',1,'ICA',0);
+    'plot',0,'offline',1,'ASR',0,'Laplace',1,'ICA',0);
 
 % Parameters for M4
 MI4params = struct('select', how_many_features_to_select, 'test', ...

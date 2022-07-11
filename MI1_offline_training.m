@@ -27,7 +27,8 @@ Baseline = params.markers(5);
 
 % Training Vector
 trainingVec = prepareTraining(numTrials,numClasses);    % vector with the conditions for each trial
-trainingVec(trainingVec==1) = 3;
+trainingVec(trainingVec==1) = 3; %% PUT THIS ONLY IN TWO CLASSES!!!!!
+
 %% Recording location
 % Define recording folder location and create the folder:
 subID = input('Please enter subject ID/Name: ');    % prompt to enter subject ID or name
@@ -43,10 +44,7 @@ if not(isfolder(todayFolder))
     mkdir(todayFolder);
 end
 recordingFolder = todayFolder;
-% recordingFolder = strcat(todayFolder, string(params.count), '\');
-% if not(isfolder(recordingFolder))
-%     mkdir(recordingFolder);
-% end
+
 %% open stream
 disp('Loading the Lab Streaming Layer library...');
 lib = lsl_loadlib();                    % load the LSL library

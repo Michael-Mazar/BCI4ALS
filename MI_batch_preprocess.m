@@ -1,9 +1,12 @@
+% A script which preprocesses several datasets together, 
+% make sure to define which folders and parameter to preprocess below
 %% Refresh
 clc; clear; close all;
 %% Load the variables
-% recordingFolder ='C:\Users\micha\Documents\Recordings\Michael_MI_NEW';
-recordingFolder = 'C:\Users\micha\MATLAB\Projects\BCI4ALS_PROJECT\Data';                                                     % Run and extract the parameters
-folders_to_preprocess = [7:8,12,14,16,22:24,28:32];
+% Change to the relevant folder
+recordingFolder = '.\Data\';                                                     % Run and extract the parameters
+folders_to_preprocess = [7:8,12,14,16];
+% folders_to_preprocess = [7:8,12,14,16,22:24,28:32];                              % Example datasets to preprocess
 config_param
 %% Verify data folder variable
 if ~endsWith(recordingFolder ,'\')
@@ -56,14 +59,12 @@ else
             disp(dataFolder_dataset)
             EEG = pop_loadxdf(dataFolder_dataset, 'streamtype', 'EEG', 'exclude_markerstreams', {});
 
-%             loaded_temp = load(strcat(recordingFolder,'\trainingVec.mat'));               % load the training vector (which target at which trial)
-%             trainingVec = loaded_temp.trainingVec;
         catch
             error('Error loading the files for %d data folder', i)
         end
         % Try preprocessing the file
         EEG.setname = 'MI_sub';
-        preprocess(EEG, dataFolder, eeglabPath, unused_channels, unwanted_channels, MI2params);
+        preprocess(EEG, dataFolder, eeglabPath, unused_channels, MI2params);
         disp('Finished pre-processing the data.')
         [MIData] = MI3_segmentation(dataFolder, fs, trialLength, startMarker, size(EEG_chans,1));
         disp('Finished segmenting the data.');
@@ -74,8 +75,9 @@ else
 
     end
 end
+
 %% Preprocess all folders
-function preprocess_loop(recordingFolder,folders_to_preprocess,eeglabPath,unused_channels, unwanted_channels, MI2params,...
+function preprocess_loop(recordingFolder,folders_to_preprocess,eeglabPath,unused_channels, MI2params,...
                 fs, trialLength, startMarker, EEG_chans, trainingVec,bands, times,feature_headers,MI4params,feature_setting)
     addpath(string(eeglabPath));     % lab streaming layer library
     eeglab;
@@ -87,14 +89,12 @@ function preprocess_loop(recordingFolder,folders_to_preprocess,eeglabPath,unused
             disp(dataFolder_dataset)
             EEG = pop_loadxdf(dataFolder_dataset, 'streamtype', 'EEG', 'exclude_markerstreams', {});
 
-%             loaded_temp = load(strcat(recordingFolder,'\trainingVec.mat'));               % load the training vector (which target at which trial)
-%             trainingVec = loaded_temp.trainingVec;
         catch
             error('Error loading the files for %d data folder', i)
         end
         % Try preprocessing the file
         EEG.setname = 'MI_sub';
-        preprocess(EEG, dataFolder, eeglabPath, unused_channels, unwanted_channels, MI2params);
+        preprocess(EEG, dataFolder, eeglabPath, unused_channels, MI2params);
         disp('Finished pre-processing the data.')
         [MIData] = MI3_segmentation(dataFolder, fs, trialLength, startMarker, size(EEG_chans,1));
         disp('Finished segmenting the data.');

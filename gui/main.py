@@ -126,8 +126,8 @@ class MIMainApp(MDApp):
         return sm
 
 
-#TODO: change according to used classes
-CLASS_TO_RESULT = {2: "yes", 3: "no"}
+# Change according to used classes
+CLASS_TO_RESULT = {1: "yes", 2: "no"}
 import os.path
 current_file_path = os.path.abspath(os.path.dirname(__file__))
 IMAGES_BASE_PATH = os.path.join(current_file_path, "images")
