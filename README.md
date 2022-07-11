@@ -17,6 +17,9 @@ so on - but please cite properly if published.
 - Raz Perry (raz.perry@mail.huji.ac.il)
 - Osher Maayan (osher.maayan@mail.huji.ac.il)
 
+## Important note
+The following instructions and the code files were tested on Windows 10 OS. Different operating systems may require some changes.
+
 ## Pre-requisites 
 - Matlab R2021b or newer (for Python integration support) with the libLSL, OpenBCI, EEGLab with ERPLAB & loadXDF plugins installed (instruction are in the course's documentation).
 - Python 3.7-3.9 (at the time of writing this document, Python 3.10 isn't supported by Matlab).
@@ -24,7 +27,7 @@ so on - but please cite properly if published.
 
 ## Python dependencies installation 
 
-Follow these instructions (tested on Windows 10 OS) for a one-time installation:
+Follow these instructions for a one-time installation:
 
 1. Open at terminal at the repository's directory
 2. Run `python -m venv venv` (creating a virtual python environement)
