@@ -1,4 +1,4 @@
-# BCI4ALS - HUJI - Team 51
+# BCI4ALS - HUJI - Team 31
 ## General
 
 This repository contains the code for our team's implementation's of Motor Imagery pipeline, as part of the BCI4ALS course during the 2021-2022 academic year. 
